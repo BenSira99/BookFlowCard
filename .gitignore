@@ -1,0 +1,68 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+.env
+.env.local
+.env.production
+*.log
+.dart_tool/
+.flutter-plugins
+*.jks
+*.keystore
+venv/
+.venv/
+*.egg-info/
+.idea/
+.vscode/
+*.db
+*.sqlite3
+coverage/
+.nyc_output/
+*.apk
+*.aab
+*.ipa
+docker-compose.override.yml
+secrets/
+*.pem
+*.key
+firebase-debug.log
+.firebase/
+supabase/.temp/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android
