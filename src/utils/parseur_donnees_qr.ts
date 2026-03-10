@@ -48,17 +48,56 @@ export const SchemaPayloadSynchronisation = z.object({
 });
 
 /**
- * Valide et parse une chaîne JSON issue d'un scan QR.
+ * Spécifications des types Desktop
  */
-export const validerDonneesQR = (source: string): { success: true, data: any } | { success: false, error: string } => {
+export type TypeUtilisateurDesktop = 'ELEVE' | 'PERSONNEL' | 'ADMIN';
+
+export interface DonneesUtilisateurDesktop {
+  nom: string;
+  prenom: string;
+  dateInscription: string;
+  infoSpecifique: string; // Classe_Num, Role ou NumCNI
+  type: TypeUtilisateurDesktop;
+}
+
+/**
+ * Valide et parse une chaîne issue d'un scan QR (Format JSON ou Desktop).
+ */
+export const validerDonneesQR = (source: string): { success: true, data: any, format: 'JSON' | 'DESKTOP' } | { success: false, error: string } => {
+  // 1. Tenter le format DESKTOP (nom_prenom_date_info_TYPE)
+  const segments = source.split('_');
+  if (segments.length >= 5) {
+    const suffixe = segments[segments.length - 1].toUpperCase();
+    if (['ELV', 'PER', 'ADM'].includes(suffixe)) {
+      const typeMap: Record<string, TypeUtilisateurDesktop> = {
+        'ELV': 'ELEVE',
+        'PER': 'PERSONNEL',
+        'ADM': 'ADMIN'
+      };
+      
+      return {
+        success: true,
+        format: 'DESKTOP',
+        data: {
+          nom: segments[0],
+          prenom: segments[1],
+          dateInscription: segments[2],
+          infoSpecifique: segments.slice(3, -1).join('_'), // Gère les segments multiples pour l'info
+          type: typeMap[suffixe]
+        } as DonneesUtilisateurDesktop
+      };
+    }
+  }
+
+  // 2. Tenter le format JSON
   try {
     const objet = JSON.parse(source);
     const validation = SchemaPayloadSynchronisation.safeParse(objet);
     if (validation.success) {
-      return { success: true, data: validation.data };
+      return { success: true, format: 'JSON', data: validation.data };
     }
     return { success: false, error: 'SCHEMA_INVALIDE' };
   } catch (e) {
-    return { success: false, error: 'JSON_INVALIDE' };
+    return { success: false, error: 'FORMAT_INCONNU' };
   }
 };

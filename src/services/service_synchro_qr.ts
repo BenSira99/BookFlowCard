@@ -65,5 +65,32 @@ export const serviceSynchroQR = {
       type: payload.type,
       message: `Synchronisation ${payload.type} réussie` 
     };
+  },
+
+  /**
+   * Traite spécifiquement les données d'inscription du logiciel Desktop.
+   */
+  traiterInscriptionDesktop: (contenu: string) => {
+    const resultat = validerDonneesQR(contenu);
+    
+    if (!resultat.success || resultat.format !== 'DESKTOP') {
+      return { success: false, erreur: 'FORMAT_INSCRIPTION_INVALIDE' };
+    }
+
+    const d = resultat.data;
+
+    // Mise à jour du magasin utilisateur
+    utiliserMagasinAuth.getState().importerUtilisateur({
+      id: `ID-${d.type}-${Date.now()}`, // ID temporaire généré
+      nom: d.nom,
+      prenom: d.prenom,
+      numeroMembre: d.infoSpecifique, // On utilise l'info spécifique comme numéro
+    });
+
+    return {
+      success: true,
+      data: d,
+      message: `Inscription ${d.type} détectée pour ${d.nom} ${d.prenom}`
+    };
   }
 };

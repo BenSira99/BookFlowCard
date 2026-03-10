@@ -61,7 +61,16 @@ export default function EcranScannerISBN() {
       return;
     }
 
-    // 2. Si ce n'est pas un QR de synchro, on teste l'ISBN
+    // 2. Tenter une inscription Desktop (nom_prenom_...)
+    const resultatInscription = serviceSynchroQR.traiterInscriptionDesktop(data);
+    if (resultatInscription.success) {
+      Alert.alert('Inscription Réussie', resultatInscription.message);
+      // Redirection vers la création du code PIN
+      (navigation as any).navigate('CreationCode');
+      return;
+    }
+
+    // 3. Si ce n'est pas un QR de synchro ou inscription, on teste l'ISBN
     const livre = rechercherParISBN(data);
     if (livre) {
       (navigation as any).navigate('DetailsLivre', { livreId: livre.id });

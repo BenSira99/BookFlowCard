@@ -3,6 +3,9 @@ import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } fr
 import { couleurs } from '../../theme/couleurs';
 import { Bouton } from '../../components/common/bouton';
 import { ChampTexte } from '../../components/common/champ_texte';
+import { serviceSynchroQR } from '../../services/service_synchro_qr';
+import { Ionicons } from '@expo/vector-icons';
+import { Alert, TouchableOpacity } from 'react-native';
 
 export default function EcranActivation({ navigation }: any) {
   const [code, setCode] = useState('');
@@ -22,9 +25,14 @@ export default function EcranActivation({ navigation }: any) {
     // Simulation réseau local
     setTimeout(() => {
       setChargement(false);
-      // OWASP M4 : Redirection vers création du PIN sans auth persistante encore
       navigation.navigate('CreationCode');
     }, 1500);
+  };
+
+  const gererScanInscription = () => {
+    // On réutilise l'écran ScannerISBN mais paramétré ou on redirige vers un nouveau scanner dédié
+    // Pour simplifier, on navigue vers ScannerISBN qui gère déjà la synchro
+    (navigation as any).navigate('ScannerISBN');
   };
 
   return (
@@ -60,6 +68,21 @@ export default function EcranActivation({ navigation }: any) {
             surClic={gererActivation} 
             estChargeant={chargement}
           />
+          
+          <View style={styles.separateur}>
+            <View style={styles.ligne} />
+            <Text style={styles.texteSeparateur}>OU</Text>
+            <View style={styles.ligne} />
+          </View>
+
+          <TouchableOpacity 
+            style={styles.boutonScan} 
+            onPress={gererScanInscription}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="qr-code-outline" size={24} color="white" />
+            <Text style={styles.texteBoutonScan}>Scanner QR Inscription</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -94,5 +117,37 @@ const styles = StyleSheet.create({
   actions: {
     paddingBottom: 20,
     marginTop: 40,
+  },
+  separateur: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  ligne: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  texteSeparateur: {
+    color: couleurs.texteSecondaire,
+    marginHorizontal: 15,
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  boutonScan: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(13, 148, 136, 0.2)',
+    paddingVertical: 15,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: couleurs.primaire,
+    gap: 10,
+  },
+  texteBoutonScan: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   }
 });
