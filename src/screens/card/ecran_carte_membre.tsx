@@ -127,7 +127,11 @@ export default function EcranCarteMembre() {
           onPress={() => setEstPleinEcran(!estPleinEcran)}
           style={[styles.conteneurQr, estPleinEcran ? styles.qrPleinEcran : null]}
         >
-          <QrDynamique secret="BIBLIOCARD_SECRET_KEY" taille={estPleinEcran ? 250 : 180} />
+          <QrDynamique 
+            secret={utilisateur?.id || "BIBLIOCARD_DEFAULT"} 
+            taille={estPleinEcran ? 250 : 180} 
+            estStatique={true} 
+          />
           {!estPleinEcran && (
             <Text style={styles.instruction}>Appuyez pour agrandir</Text>
           )}

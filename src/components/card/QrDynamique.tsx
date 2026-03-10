@@ -14,14 +14,15 @@ import { couleurs } from '../../theme/couleurs';
 interface ProprietesQrDynamique {
   secret: string;
   taille: number;
+  estStatique?: boolean; // Nouvelle option
 }
 
 /**
  * QR Code dynamique avec rotation TOTP (30s).
  * Animations : Timer circulaire + morphing (dissolution) lors du renouvellement.
  */
-export const QrDynamique = ({ secret, taille }: ProprietesQrDynamique) => {
-  const [codeActuel, setCodeActuel] = useState(generateurTOTP.genererCode(secret));
+export const QrDynamique = ({ secret, taille, estStatique = false }: ProprietesQrDynamique) => {
+  const [codeActuel, setCodeActuel] = useState(estStatique ? secret : generateurTOTP.genererCode(secret));
   const [codeCible, setCodeCible] = useState(codeActuel);
   const [tempsRestant, setTempsRestant] = useState(generateurTOTP.tempsRestant());
   
@@ -45,6 +46,8 @@ export const QrDynamique = ({ secret, taille }: ProprietesQrDynamique) => {
   }, [codeActuel, secret]);
 
   useEffect(() => {
+    if (estStatique) return; // Pas d'intervalle en mode statique
+
     const intervalle = setInterval(() => {
       const restant = generateurTOTP.tempsRestant();
       setTempsRestant(restant);
@@ -60,8 +63,10 @@ export const QrDynamique = ({ secret, taille }: ProprietesQrDynamique) => {
 
   return (
     <View style={[styles.conteneur, { width: taille + 20, height: taille + 20 }]}>
-      {/* Timer circulaire */}
-      <TimerQr periode={30} tempsRestant={tempsRestant} taille={taille + 20} />
+      {/* Timer circulaire - Masqué en mode statique */}
+      {!estStatique && (
+        <TimerQr periode={30} tempsRestant={tempsRestant} taille={taille + 20} />
+      )}
 
       {/* QR Codes avec superposition pour l'effet de morphing */}
       <View style={[styles.zoneQr, { width: taille, height: taille }]}>
