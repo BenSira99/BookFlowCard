@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { couleurs } from '../../theme/couleurs';
 import { utiliserMagasinAuth } from '../../store/magasin_auth';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 
 export default function EcranAccueil() {
+  const navigation = useNavigation();
   const { utilisateur, deconnecter } = utiliserMagasinAuth();
   const [rafraichissement, setRafraichissement] = React.useState(false);
 
@@ -86,7 +88,11 @@ export default function EcranAccueil() {
         <Animated.View entering={FadeInUp.delay(300).springify()} style={styles.section}>
           <Text style={styles.titreSection}>Actions rapides</Text>
           <View style={styles.grilleActions}>
-            <BoutonAction icone="search-outline" titre="Catalogue" />
+            <BoutonAction 
+              icone="search-outline" 
+              titre="Catalogue" 
+              onPress={() => (navigation as any).navigate('Catalogue')} 
+            />
             <BoutonAction icone="calendar-outline" titre="Réservations" />
             <BoutonAction icone="time-outline" titre="Historique" />
             <BoutonAction icone="settings-outline" titre="Paramètres" />
@@ -100,8 +106,8 @@ export default function EcranAccueil() {
   );
 }
 
-const BoutonAction = ({ icone, titre }: { icone: keyof typeof Ionicons.glyphMap, titre: string }) => (
-  <TouchableOpacity style={styles.boutonAction} activeOpacity={0.7}>
+const BoutonAction = ({ icone, titre, onPress }: { icone: keyof typeof Ionicons.glyphMap, titre: string, onPress?: () => void }) => (
+  <TouchableOpacity style={styles.boutonAction} activeOpacity={0.7} onPress={onPress}>
     <View style={styles.cercleAction}>
       <Ionicons name={icone} size={24} color={couleurs.primaire} />
     </View>

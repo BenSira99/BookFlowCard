@@ -8,6 +8,9 @@ import { utiliserMagasinAuth } from '../store/magasin_auth';
 import NavigateurAuth from './navigateur_auth';
 import NavigateurPrincipal from './navigateur_principal';
 import EcranStatistiquesDetaillees from '../screens/statistics/ecran_statistiques_detaillees';
+import EcranCatalogue from '../screens/catalog/ecran_catalogue';
+import EcranScannerISBN from '../screens/catalog/ecran_scanner_isbn';
+import EcranDetailsLivre from '../screens/catalog/ecran_details_livre';
 
 const PileReseau = createNativeStackNavigator();
 
@@ -44,6 +47,21 @@ export default function NavigateurRacine() {
             <PileReseau.Screen 
               name="StatsDetaillees" 
               component={EcranStatistiquesDetaillees} 
+              options={{ animation: 'slide_from_right' }}
+            />
+            <PileReseau.Screen 
+              name="Catalogue" 
+              component={EcranCatalogue} 
+              options={{ animation: 'fade_from_bottom' }}
+            />
+            <PileReseau.Screen 
+              name="ScannerISBN" 
+              component={EcranScannerISBN} 
+              options={{ animation: 'slide_from_bottom', presentation: 'fullScreenModal' }}
+            />
+            <PileReseau.Screen 
+              name="DetailsLivre" 
+              component={EcranDetailsLivre} 
               options={{ animation: 'slide_from_right' }}
             />
           </>
