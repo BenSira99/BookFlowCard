@@ -24,7 +24,12 @@ export const serviceSynchroQR = {
     switch (payload.type) {
       case 'CATALOGUE':
         if (payload.donnees.livres) {
-          utiliserMagasinCatalogue.getState().importerLivres(payload.donnees.livres as any);
+          const stats = utiliserMagasinCatalogue.getState().fusionnerCatalogue(payload.donnees.livres as any);
+          return {
+            success: true,
+            type: payload.type,
+            message: `Synchronisation du catalogue réussie.\nAjoutés : ${stats.ajoutes}\nMis à jour : ${stats.misAJour}`
+          };
         }
         break;
       

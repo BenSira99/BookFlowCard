@@ -8,11 +8,14 @@ import EcranCarteMembre from '../screens/card/ecran_carte_membre';
 import EcranProfil from '../screens/profile/ecran_profil';
 import NavigateurBibliotheque from './navigateur_bibliotheque';
 import EcranNotifications from '../screens/notifications/ecran_notifications';
+import EcranPartageRadar from '../screens/share/ecran_partage_radar';
 import { IconeClocheAnimee } from '../components/notifications/icone_cloche_animee';
+import { createStackNavigator } from '@react-navigation/stack';
 
 const Onglets = createBottomTabNavigator();
+const StackPrincipal = createStackNavigator();
 
-export default function NavigateurPrincipal() {
+function NavigateurOnglets() {
   return (
     <Onglets.Navigator
       screenOptions={({ route }) => ({
@@ -71,5 +74,18 @@ export default function NavigateurPrincipal() {
         options={{ title: 'Profil' }}
       />
     </Onglets.Navigator>
+  );
+}
+
+export default function NavigateurPrincipal() {
+  return (
+    <StackPrincipal.Navigator screenOptions={{ headerShown: false }}>
+      <StackPrincipal.Screen name="Onglets" component={NavigateurOnglets} />
+      <StackPrincipal.Screen 
+        name="PartageRadar" 
+        component={EcranPartageRadar} 
+        options={{ presentation: 'modal' }} // S'ouvre de bas en haut
+      />
+    </StackPrincipal.Navigator>
   );
 }

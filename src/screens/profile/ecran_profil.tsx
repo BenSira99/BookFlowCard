@@ -205,6 +205,19 @@ export default function EcranProfil() {
           <ItemProfil label="Biométrie" valeur="FaceID" icone="finger-print-outline" modifiable />
         </SectionProfil>
 
+        <SectionProfil titre="Synchronisation & Partage" index={4}>
+          <TouchableOpacity onPress={() => (navigation as any).navigate('PartageRadar')}>
+            <View pointerEvents="none">
+              <ItemProfil 
+                label="Transfert P2P" 
+                valeur="Partager le catalogue" 
+                icone="share-social-outline" 
+                modifiable 
+              />
+            </View>
+          </TouchableOpacity>
+        </SectionProfil>
+
         <TouchableOpacity style={styles.boutonDeconnexion} onPress={deconnecter}>
           <Text style={styles.texteDeconnexion}>Se déconnecter</Text>
         </TouchableOpacity>

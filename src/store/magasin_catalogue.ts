@@ -34,6 +34,7 @@ interface EtatCatalogue {
   basculerFavori: (id: string) => void;
   rechercherParISBN: (isbn: string) => Livre | undefined;
   importerLivres: (nouveauxLivres: Livre[]) => void;
+  fusionnerCatalogue: (nouveauxLivres: Livre[]) => { ajoutes: number, misAJour: number };
 }
 
 export const utiliserMagasinCatalogue = create<EtatCatalogue>()(
@@ -119,6 +120,52 @@ export const utiliserMagasinCatalogue = create<EtatCatalogue>()(
 
       importerLivres: (nouveauxLivres) => {
         set({ livres: nouveauxLivres });
+      },
+
+      /**
+       * Module 10: Fusion Multi-Critères du Catalogue.
+       * Compare strictement sur `titre`, `auteur`, `categorie` (type_ressource) et `rayon` (genre).
+       * Met à jour le stock si trouvé, sinon ajoute le nouveau livre.
+       */
+      fusionnerCatalogue: (nouveauxLivres) => {
+        const etatActuel = get().livres;
+        let livresAjoutes = 0;
+        let livresMisAJour = 0;
+        
+        // Copie mutable de l'état actuel pour travailler dessus
+        const catalogueFusionne = [...etatActuel];
+
+        nouveauxLivres.forEach(nouveauLivre => {
+          // Recherche d'une correspondance stricte (ignorer la casse et les espaces superflus)
+          const normaliser = (chaine: string) => (chaine || '').toLowerCase().trim();
+          
+          const indexExistant = catalogueFusionne.findIndex(l => 
+            normaliser(l.titre) === normaliser(nouveauLivre.titre) &&
+            normaliser(l.auteur) === normaliser(nouveauLivre.auteur) &&
+            normaliser(l.categorie) === normaliser(nouveauLivre.categorie) &&
+            normaliser(l.rayon) === normaliser(nouveauLivre.rayon)
+          );
+
+          if (indexExistant >= 0) {
+            // Le livre existe : On met à jour son stock et sa disponibilité
+            catalogueFusionne[indexExistant] = {
+              ...catalogueFusionne[indexExistant],
+              exemplairesDisponibles: nouveauLivre.exemplairesDisponibles,
+              estDisponible: nouveauLivre.exemplairesDisponibles > 0,
+              // On peut éventuellement rafraîchir d'autres infos si nécessaire
+            };
+            livresMisAJour++;
+          } else {
+            // Le livre n'existe pas : On l'ajoute
+            catalogueFusionne.push(nouveauLivre);
+            livresAjoutes++;
+          }
+        });
+
+        // Mise à jour de l'état global
+        set({ livres: catalogueFusionne });
+
+        return { ajoutes: livresAjoutes, misAJour: livresMisAJour };
       }
     }),
     {
