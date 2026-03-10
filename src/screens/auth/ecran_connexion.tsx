@@ -110,7 +110,7 @@ export default function EcranConnexion() {
       id: '1',
       nom: 'Dupont',
       prenom: 'Jean',
-      numeroMembre: 'BIB-2026-001'
+      typeRole: 'Utilisateur Régulier'
     });
   };
 

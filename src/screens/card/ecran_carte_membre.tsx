@@ -100,7 +100,7 @@ export default function EcranCarteMembre() {
             <PhotoMembre taille={60} />
             <View style={styles.infosUtilisateur}>
               <Text style={styles.nomMembre}>{utilisateur?.prenom} {utilisateur?.nom}</Text>
-              <Text style={styles.numeroMembre}>{utilisateur?.numeroMembre}</Text>
+              <Text style={styles.numeroMembre}>{utilisateur?.id}</Text>
             </View>
             <BadgeStatut estActif={true} />
           </View>

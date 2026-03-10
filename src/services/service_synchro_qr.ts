@@ -36,7 +36,7 @@ export const serviceSynchroQR = {
             id: m.id,
             nom: m.nom,
             prenom: m.prenom,
-            numeroMembre: m.id // Réutilisation de l'ID comme numéro de membre si non spécifié
+            typeRole: 'Utilisateur', // Par défaut pour la session via login synchro
           });
         }
         
@@ -73,24 +73,46 @@ export const serviceSynchroQR = {
   traiterInscriptionDesktop: (contenu: string) => {
     const resultat = validerDonneesQR(contenu);
     
-    if (!resultat.success || resultat.format !== 'DESKTOP') {
+    // On accepte soit le dictionnaire complet JSON_INSCRIPTION, soit la chaîne courte DESKTOP_COURT
+    if (!resultat.success || (resultat.format !== 'DESKTOP_COURT' && resultat.format !== 'JSON_INSCRIPTION')) {
       return { success: false, erreur: 'FORMAT_INSCRIPTION_INVALIDE' };
     }
 
     const d = resultat.data;
 
-    // Mise à jour du magasin utilisateur
-    utiliserMagasinAuth.getState().importerUtilisateur({
-      id: `ID-${d.type}-${Date.now()}`, // ID temporaire généré
-      nom: d.nom,
-      prenom: d.prenom,
-      numeroMembre: d.infoSpecifique, // On utilise l'info spécifique comme numéro
-    });
+    if (resultat.format === 'JSON_INSCRIPTION') {
+      // Cas: Le QR Code est le JSON généré par la méthode get_data() du Desktop
+      utiliserMagasinAuth.getState().importerUtilisateur({
+        id: d.qr_code, 
+        nom: d.nom,
+        prenom: d.prenom,
+        typeRole: d.type,
+        sexe: d.sexe,
+        telephone: d.numero_telephone,
+        dateInscription: d.date_inscription,
+        donneesBrutes: d // Stocke l'entièreté de l'objet pour s'y référer plus tard !
+      });
 
-    return {
-      success: true,
-      data: d,
-      message: `Inscription ${d.type} détectée pour ${d.nom} ${d.prenom}`
-    };
+      return {
+        success: true,
+        data: d,
+        message: `Inscription ${d.type} détectée pour ${d.nom} ${d.prenom} (Format Completely Secure)`
+      };
+    } else {
+      // Cas: Le QR Code n'est que la petite chaine (nom_prenom_date_info_TYPE)
+      utiliserMagasinAuth.getState().importerUtilisateur({
+        id: `ID-${d.type}-${Date.now()}`, 
+        nom: d.nom,
+        prenom: d.prenom,
+        typeRole: d.type,
+        dateInscription: d.dateInscription
+      });
+
+      return {
+        success: true,
+        data: d,
+        message: `Inscription ${d.type} détectée pour ${d.nom} ${d.prenom} (Format Court)`
+      };
+    }
   }
 };

@@ -58,7 +58,7 @@ export default function EcranAccueil() {
               <Ionicons name="card" size={24} color={couleurs.accentDoré} />
               <Text style={styles.titreCarte}>Carte Numérique</Text>
             </View>
-            <Text style={styles.numeroMembre}>{utilisateur?.numeroMembre}</Text>
+            <Text style={styles.numeroMembre}>{utilisateur?.id}</Text>
             <View style={styles.piedCarte}>
               <Text style={styles.statutCarte}>Statut : Actif</Text>
               <Ionicons name="qr-code-outline" size={28} color={couleurs.textePrincipal} />

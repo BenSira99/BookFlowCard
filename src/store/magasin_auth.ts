@@ -1,12 +1,20 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { zustandSecureStorage } from '../utils/storage_securise_zustand';
 
-interface Utilisateur {
-  id: string;
+export interface Utilisateur {
+  id: string; // Fera office de qr_code ID
   nom: string;
   prenom: string;
-  numeroMembre: string;
+  typeRole: string; // 'élève' | 'admin' | string (personnel)
+  
+  sexe?: string;
+  telephone?: string;
+  dateInscription?: string;
+  
+  // Enregistrement des détails complets formatés en JSON string 
+  // Ou accessible individuellement selon les besoins futurs.
+  donneesBrutes?: any; 
 }
 
 interface EtatAuth {
@@ -69,13 +77,13 @@ export const utiliserMagasinAuth = create<EtatAuth>()(
       importerUtilisateur: (utilisateur) => set({ utilisateur, estConnecte: true })
     }),
     {
-      name: 'auth-storage', // Nom unique pour AsyncStorage
-      storage: createJSONStorage(() => AsyncStorage),
+      name: 'auth-storage-secure', // Nom unique avec Store Sécurisé
+      storage: createJSONStorage(() => zustandSecureStorage),
       // On ne persiste pas 'jeton' ni 'estConnecte' car la connexion se fait via PIN
       partialize: (state) => ({ 
         utilisateur: state.utilisateur,
         estVerrouille: state.estVerrouille,
-        tentativesEchouees: state.tentativesEchouees // On garde trace des tentatives même après redémarrage 
+        tentativesEchouees: state.tentativesEchouees 
       }),
     }
   )

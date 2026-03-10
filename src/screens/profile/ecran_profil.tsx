@@ -160,7 +160,7 @@ export default function EcranProfil() {
 
         <Animated.View style={[styles.headerTextes, styleTextes]}>
           <Text style={styles.nom}>{utilisateur?.prenom} {utilisateur?.nom}</Text>
-          <Text style={styles.numeroMembre}>{utilisateur?.numeroMembre}</Text>
+          <Text style={styles.numeroMembre}>{utilisateur?.id}</Text>
         </Animated.View>
       </Animated.View>
 

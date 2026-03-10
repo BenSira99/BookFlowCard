@@ -41,7 +41,7 @@ export default function EcranConfigurationBiometrie({ navigation }: any) {
       id: '1',
       nom: 'Dupont',
       prenom: 'Jean',
-      numeroMembre: 'BIB-2026-001'
+      typeRole: 'Utilisateur',
     });
     
     // OWASP M4 : Redirection gérée au niveau racine par changement d'état (estConnecte)
