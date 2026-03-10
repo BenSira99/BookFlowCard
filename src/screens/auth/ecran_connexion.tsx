@@ -5,18 +5,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { couleurs } from '../../theme/couleurs';
 import { ClavierNumerique } from '../../components/common/clavier_numerique';
 import { utiliserMagasinAuth } from '../../store/magasin_auth';
+import { utiliserMagasinSecurite } from '../../store/magasin_securite';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming, withRepeat } from 'react-native-reanimated';
-import { cryptoUtils } from '../../utils/crypto_utils';
-import { stockageSecurise } from '../../utils/stockage_securise';
 import { Alert } from 'react-native';
 
 export default function EcranConnexion() {
   const [pin, setPin] = useState('');
   const [biometrieDisponible, setBiometrieDisponible] = useState(false);
-  const [verrouille, setVerrouille] = useState(false);
   
-  // Utilisation de Zustand pour l'état global et les actions
-  const { connecter, incrementerTentatives, tentativesEchouees, estVerrouille } = utiliserMagasinAuth();
+  // Magasins Zustand
+  const { connecter } = utiliserMagasinAuth();
+  const { 
+    verifierPin, 
+    estVerrouille, 
+    incrementerEchecs, 
+    reinitialiserEchecs 
+  } = utiliserMagasinSecurite();
   
   const LONGUEUR_PIN = 6;
   const shakeAnimation = useSharedValue(0);
@@ -30,20 +34,23 @@ export default function EcranConnexion() {
     setBiometrieDisponible(enregistre);
     
     // Auto prompt biométrie au lancement
-    if (enregistre) {
+    if (enregistre && !estVerrouille) {
       setTimeout(declencherBiometrie, 500);
     }
   };
 
   const declencherBiometrie = async () => {
     try {
+      if (estVerrouille) return;
+
       const resultat = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Connexion à BiblioCard',
+        promptMessage: 'Connexion à BookFlow Card',
         cancelLabel: 'Utiliser le code PIN',
         disableDeviceFallback: true,
       });
 
       if (resultat.success) {
+        reinitialiserEchecs();
         simulerConnexion();
       }
     } catch (e) {
@@ -65,7 +72,7 @@ export default function EcranConnexion() {
       setPin(nouveauPin);
       
       if (nouveauPin.length === LONGUEUR_PIN) {
-        setTimeout(() => verifierPin(nouveauPin), 300);
+        setTimeout(() => verifierLePin(nouveauPin), 300);
       }
     }
   };
@@ -76,25 +83,22 @@ export default function EcranConnexion() {
     }
   };
 
-  const verifierPin = async (codeSaisi: string) => {
+  const verifierLePin = async (codeSaisi: string) => {
     try {
-      // 1. Récupération du hash stocké
-      const hashStocke = await stockageSecurise.recuperer('USER_PIN_HASH');
-      
-      if (!hashStocke) {
-        Alert.alert('Erreur', 'Aucun PIN configuré. Veuillez réinscrire la carte.');
-        return;
-      }
-
-      // 2. Vérification cryptographique
-      const estValide = await cryptoUtils.verifierPIN(codeSaisi, hashStocke);
+      const estValide = await verifierPin(codeSaisi);
       
       if (estValide) {
+        reinitialiserEchecs();
         simulerConnexion();
       } else {
         secouerClavier();
         setPin('');
-        incrementerTentatives();
+        incrementerEchecs();
+        
+        const reste = utiliserMagasinSecurite.getState().tentativesRestantes;
+        if (reste > 0) {
+          Alert.alert('Code Incorrect', `Il vous reste ${reste} tentatives avant le verrouillage.`);
+        }
       }
     } catch (error) {
       console.error('Erreur lors de la vérification du PIN:', error);

@@ -1,6 +1,8 @@
-import { cacheDirectory, writeAsStringAsync, EncodingType } from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
+import * as DocumentPicker from 'expo-document-picker';
 import { utiliserMagasinCatalogue } from '../store/magasin_catalogue';
+import { serviceSynchroQR } from './service_synchro_qr';
 
 /**
  * Service gérant le partage Peer-to-Peer hors ligne.
@@ -32,10 +34,10 @@ export const servicePartageP2P = {
       // 3. Création du fichier physique (.bcf pour être spécifique)
       const contenuJson = JSON.stringify(payload);
       const nomFichier = `BookFlow_Catalogue_${Date.now()}.bcf`;
-      const cheminFichier = `${cacheDirectory}${nomFichier}`;
+      const cheminFichier = `${FileSystem.cacheDirectory}${nomFichier}`;
 
-      await writeAsStringAsync(cheminFichier, contenuJson, {
-        encoding: EncodingType.UTF8,
+      await FileSystem.writeAsStringAsync(cheminFichier, contenuJson, {
+        encoding: FileSystem.EncodingType.UTF8,
       });
 
       // 4. Lancement du partage natif (Ex: Nearby Share)
@@ -56,6 +58,39 @@ export const servicePartageP2P = {
     } catch (erreur) {
       console.error('Erreur lors du partage P2P:', erreur);
       return { success: false, message: 'Une erreur est survenue lors du partage.' };
+    }
+  },
+
+  /**
+   * Ouvre le sélecteur de documents pour importer un fichier .bcf
+   */
+  importerFichierBCF: async (): Promise<any> => {
+    try {
+      const resultatPick = await DocumentPicker.getDocumentAsync({
+        type: '*/*', // On filtre idéalement par extension si possible, sinon on valide après
+        copyToCacheDirectory: true
+      });
+
+      if (resultatPick.canceled) {
+        return { success: false, message: 'Importation annulée.' };
+      }
+
+      const fichier = resultatPick.assets[0];
+      
+      // Validation extension (optionnel mais recommandé)
+      if (!fichier.name.endsWith('.bcf') && !fichier.name.endsWith('.json')) {
+        return { success: false, message: 'Format de fichier non supporté. (.bcf requis)' };
+      }
+
+      // 1. Lecture du contenu
+      const contenu = await FileSystem.readAsStringAsync(fichier.uri);
+      
+      // 2. Traitement via le service de synchro (réutilise la logique existante)
+      return serviceSynchroQR.traiterScan(contenu);
+
+    } catch (erreur) {
+      console.error('Erreur lors de l’importation du fichier:', erreur);
+      return { success: false, message: 'Impossible de lire le fichier.' };
     }
   }
 };

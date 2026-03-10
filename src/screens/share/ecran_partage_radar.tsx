@@ -13,6 +13,7 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import { couleurs } from '../../theme/couleurs';
 import { servicePartageP2P } from '../../services/service_partage_p2p';
+import { useNavigation } from '@react-navigation/native';
 import { Alert } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -22,6 +23,7 @@ const { width } = Dimensions.get('window');
  * Utilise des ondes concentriques animées (Reanimated).
  */
 export default function EcranPartageRadar() {
+  const navigation = useNavigation();
   // Animation des ondes (3 anneaux)
   const onde1 = useSharedValue(0.2);
   const onde2 = useSharedValue(0.2);
@@ -60,6 +62,30 @@ export default function EcranPartageRadar() {
     }
   };
 
+  const gererReception = async () => {
+    const resultat = await servicePartageP2P.importerFichierBCF();
+    
+    if (resultat.success) {
+       if (resultat.type === 'CATALOGUE') {
+         // Redirection vers le résumé visuel
+         (navigation as any).navigate('ResumeImportation', { 
+           ajoutes: resultat.ajoutes, 
+           misAJour: resultat.misAJour 
+         });
+       } else if (resultat.type === 'TRANSACTIONS') {
+         (navigation as any).navigate('ResumeTransactions', { 
+           delta: resultat.delta 
+         });
+       } else {
+         Alert.alert('Succès', resultat.message || 'Importation réussie.');
+       }
+    } else {
+      if (resultat.erreur !== 'CANCELLED') {
+         Alert.alert('Erreur', resultat.message || 'Impossible d’importer le fichier.');
+      }
+    }
+  };
+
   return (
     <View style={styles.conteneur}>
       <Text style={styles.titre}>Partage Haute Vitesse</Text>
@@ -88,8 +114,17 @@ export default function EcranPartageRadar() {
       </View>
 
       <Text style={styles.instruction}>
-        Appuyez au centre pour rechercher les appareils à proximité.
+        Appuyez au centre pour envoyer vos données ou en bas pour recevoir.
       </Text>
+
+      {/* Bouton Recevoir (Style Xender) */}
+      <TouchableOpacity 
+        style={styles.boutonRecevoir}
+        onPress={gererReception}
+      >
+        <Ionicons name="download-outline" size={24} color="white" style={{ marginRight: 10 }} />
+        <Text style={styles.texteBoutonRecevoir}>RECEVOIR / IMPORTER</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -165,5 +200,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: couleurs.texteSecondaire,
     fontStyle: 'italic',
+  },
+  boutonRecevoir: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 25,
+    paddingVertical: 15,
+    borderRadius: 30,
+    marginTop: 40,
+    alignItems: 'center',
+  },
+  texteBoutonRecevoir: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
+    letterSpacing: 0.5,
   }
 });

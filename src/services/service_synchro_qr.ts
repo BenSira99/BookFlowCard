@@ -1,123 +1,123 @@
-import { validerDonneesQR } from '../utils/parseur_donnees_qr';
-import { utiliserMagasinCatalogue } from '../store/magasin_catalogue';
-import { utiliserMagasinBibliotheque } from '../store/magasin_bibliotheque';
+import { validerDonneesQR, SchemaPayloadSynchronisation, DonneesInscriptionDesktopJSON } from '../utils/parseur_donnees_qr';
+import { utiliserMagasinCatalogue, Livre } from '../store/magasin_catalogue';
 import { utiliserMagasinAuth } from '../store/magasin_auth';
+import { utiliserMagasinTransactions } from '../store/magasin_transactions';
+import { inputSanitizer } from '../utils/input_sanitizer';
 
 /**
- * Service orchestrant la synchronisation des données via QR Code.
- * Transforme les payloads scannés en mises à jour d'état globales.
+ * Service orchestrant la synchronisation des données issues des QR Codes.
+ * Fait le pont entre le parseur (validation) et les magasins Zustand (persistance).
  */
 export const serviceSynchroQR = {
   /**
    * Traite une chaîne de caractères issue d'un scan QR.
+   * Retourne un objet de succès avec les données de delta pour l'affichage.
    */
-  traiterScan: (contenu: string) => {
-    const resultat = validerDonneesQR(contenu);
+  traiterScan: (contenu: string): any => {
+    // 1. Sanitization de la chaîne brute (CWE-79)
+    const contenuPropre = inputSanitizer.nettoyerTexte(contenu);
     
-    if (!resultat.success) {
-      return { success: false, erreur: 'DONNEES_INVALIDES' };
+    const validation = validerDonneesQR(contenuPropre);
+    
+    if (!validation.success) {
+      return { success: false, erreur: validation.error };
     }
 
-    const payload = (resultat as any).data;
+    // 2. Sanitization récursive de l'objet (CWE-20)
+    const data = inputSanitizer.sanitiserObjet(validation.data);
+    const format = validation.format;
 
-    // Dispatching des données vers les magasins appropriés
-    switch (payload.type) {
-      case 'CATALOGUE':
-        if (payload.donnees.livres) {
-          const stats = utiliserMagasinCatalogue.getState().fusionnerCatalogue(payload.donnees.livres as any);
-          return {
-            success: true,
-            type: payload.type,
-            message: `Synchronisation du catalogue réussie.\nAjoutés : ${stats.ajoutes}\nMis à jour : ${stats.misAJour}`
-          };
-        }
-        break;
+    // A. Cas Synchronisation JSON (Catalogue / Session)
+    if (format === 'JSON_SYNCHRO') {
+      const payload = data;
       
-      case 'SESSION_UTILISATEUR':
-        if (payload.donnees.membre) {
-          // Mise à jour du profil utilisateur et connexion automatique
-          const m = payload.donnees.membre;
-          utiliserMagasinAuth.getState().importerUtilisateur({
-            id: m.id,
-            nom: m.nom,
-            prenom: m.prenom,
-            typeRole: 'Utilisateur', // Par défaut pour la session via login synchro
-          });
-        }
-        
-        // Mise à jour de la situation bibliothèque (emprunts, etc.)
-        utiliserMagasinBibliotheque.getState().importerSession({
-          emprunts: payload.donnees.emprunts as any,
-          reservations: payload.donnees.reservations as any,
-          amendes: payload.donnees.amendes as any,
-          scoreKarma: payload.donnees.scoreKarma
-        });
-        break;
+      switch (payload.type) {
+        case 'CATALOGUE':
+          if (Array.isArray(payload.donnees.livres)) {
+            const resultat = utiliserMagasinCatalogue.getState().fusionnerCatalogue(payload.donnees.livres as Livre[]);
+            return { 
+              success: true, 
+              type: 'CATALOGUE', 
+              ajoutes: resultat.ajoutes, 
+              misAJour: resultat.misAJour 
+            };
+          }
+          break;
 
-      case 'MAJ_MANUELLE':
-        // Mise à jour ciblée (ex: on vient de rendre un livre ou payer une amende)
-        utiliserMagasinBibliotheque.getState().importerSession({
-          emprunts: payload.donnees.emprunts as any,
-          reservations: payload.donnees.reservations as any,
-          amendes: payload.donnees.amendes as any,
-          scoreKarma: payload.donnees.scoreKarma
-        });
-        break;
+        case 'SESSION_UTILISATEUR':
+          if (payload.donnees.membre) {
+            const m = payload.donnees.membre;
+            utiliserMagasinAuth.getState().importerUtilisateur({
+              id: m.id,
+              nom: m.nom,
+              prenom: m.prenom,
+              pseudonyme: m.pseudonyme,
+              photo: m.photo,
+              dateExpiration: m.dateExpiration,
+              typeRole: m.typeAbonnement as any,
+              secretQR: m.secretQR
+            });
+            return { success: true, type: 'SESSION', message: 'Session utilisateur importée.' };
+          }
+          break;
+      }
     }
 
-    return { 
-      success: true, 
-      type: payload.type,
-      message: `Synchronisation ${payload.type} réussie` 
-    };
+    // B. Cas Transactions Desktop (Emprunts, Réservations, Amendes)
+    if (format === 'JSON_TRANSACTIONS') {
+      const delta = utiliserMagasinTransactions.getState().synchroniserTransactions(data);
+      return {
+        success: true,
+        type: 'TRANSACTIONS',
+        delta
+      };
+    }
+
+    // C. Cas Inscription Desktop (JSON complet ou format court)
+    if (format === 'JSON_INSCRIPTION' || format === 'DESKTOP_COURT') {
+      return serviceSynchroQR.traiterInscriptionDesktop(contenu);
+    }
+
+    return { success: false, erreur: 'TYPE_NON_GERE' };
   },
 
   /**
-   * Traite spécifiquement les données d'inscription du logiciel Desktop.
+   * Logique spécifique pour l'inscription (Nouvelle installation / activation).
    */
-  traiterInscriptionDesktop: (contenu: string) => {
-    const resultat = validerDonneesQR(contenu);
-    
-    // On accepte soit le dictionnaire complet JSON_INSCRIPTION, soit la chaîne courte DESKTOP_COURT
-    if (!resultat.success || (resultat.format !== 'DESKTOP_COURT' && resultat.format !== 'JSON_INSCRIPTION')) {
-      return { success: false, erreur: 'FORMAT_INSCRIPTION_INVALIDE' };
-    }
+  traiterInscriptionDesktop: (chaine: string): any => {
+    const validation = validerDonneesQR(chaine);
+    if (!validation.success) return { success: false, erreur: validation.error };
 
-    const d = resultat.data;
+    const format = validation.format;
+    const data = validation.data;
 
-    if (resultat.format === 'JSON_INSCRIPTION') {
-      // Cas: Le QR Code est le JSON généré par la méthode get_data() du Desktop
+    // Normalisation vers l'interface Utilisateur du magasin_auth
+    if (format === 'JSON_INSCRIPTION') {
+      const d = data as DonneesInscriptionDesktopJSON;
       utiliserMagasinAuth.getState().importerUtilisateur({
-        id: d.qr_code, 
+        id: d.qr_code,
         nom: d.nom,
         prenom: d.prenom,
-        typeRole: d.type,
-        sexe: d.sexe,
-        telephone: d.numero_telephone,
-        dateInscription: d.date_inscription,
-        donneesBrutes: d // Stocke l'entièreté de l'objet pour s'y référer plus tard !
+        dateExpiration: d.date_expiration || '',
+        typeRole: d.type as any,
+        photo: d.photo_profil || undefined,
+        secretQR: d.qr_code
       });
+      return { success: true, type: 'INSCRIPTION', message: 'Inscription réussie.' };
+    } 
 
-      return {
-        success: true,
-        data: d,
-        message: `Inscription ${d.type} détectée pour ${d.nom} ${d.prenom} (Format Completely Secure)`
-      };
-    } else {
-      // Cas: Le QR Code n'est que la petite chaine (nom_prenom_date_info_TYPE)
+    if (format === 'DESKTOP_COURT') {
+      const d = data;
       utiliserMagasinAuth.getState().importerUtilisateur({
-        id: `ID-${d.type}-${Date.now()}`, 
+        id: d.infoSpecifique, // On utilise l'info specifique (ex: ID unique)
         nom: d.nom,
         prenom: d.prenom,
-        typeRole: d.type,
-        dateInscription: d.dateInscription
+        typeRole: d.type as any,
+        secretQR: d.infoSpecifique
       });
-
-      return {
-        success: true,
-        data: d,
-        message: `Inscription ${d.type} détectée pour ${d.nom} ${d.prenom} (Format Court)`
-      };
+      return { success: true, type: 'INSCRIPTION', message: 'Inscription réussie (Format court).' };
     }
+
+    return { success: false, erreur: 'FORMAT_INSCRIPTION_INVALIDE' };
   }
 };

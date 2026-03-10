@@ -2,24 +2,17 @@ import React from 'react';
 import { StyleSheet, View, Text, ScrollView, Alert } from 'react-native';
 import Animated, { FadeIn, SlideOutRight } from 'react-native-reanimated';
 import { couleurs } from '../../theme/couleurs';
-import { utiliserMagasinBibliotheque } from '../../store/magasin_bibliotheque';
+import { utiliserMagasinTransactions } from '../../store/magasin_transactions';
 import { CarteReservation } from '../../components/library/carte_reservation';
 
 export default function EcranReservations() {
-  const { reservations, annulerReservation } = utiliserMagasinBibliotheque();
+  const { reservations } = utiliserMagasinTransactions();
+  const listeReservations = Object.values(reservations);
 
   const handleAnnuler = (id: string) => {
     Alert.alert(
-      'Annuler la réservation',
-      'Êtes-vous sûr de vouloir annuler cette réservation ? Vous perdrez votre place dans la file d\'attente.',
-      [
-        { text: 'Non', style: 'cancel' },
-        { 
-          text: 'Oui, annuler', 
-          style: 'destructive',
-          onPress: () => annulerReservation(id)
-        }
-      ]
+      'Annulation au Guichet',
+      'Pour annuler une réservation, veuillez scanner votre QR Code au guichet de la bibliothèque.'
     );
   };
 
@@ -27,16 +20,16 @@ export default function EcranReservations() {
     <View style={styles.conteneurGlobal}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         
-        {reservations.length === 0 ? (
+        {listeReservations.length === 0 ? (
           <Animated.View entering={FadeIn} style={styles.etatVide}>
              <Text style={styles.texteVide}>Vous n'avez aucune réservation en cours.</Text>
           </Animated.View>
         ) : (
-          <Text style={styles.titreSection}>Vos Réservations ({reservations.length}/3)</Text>
+          <Text style={styles.titreSection}>Vos Réservations ({listeReservations.length})</Text>
         )}
 
-        {reservations.map((res) => (
-          <Animated.View key={res.id} exiting={SlideOutRight}>
+        {listeReservations.map((res) => (
+          <Animated.View key={String(res.id_reservation)} exiting={SlideOutRight}>
             <CarteReservation 
               reservation={res} 
               surAnnuler={handleAnnuler}

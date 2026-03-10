@@ -56,8 +56,19 @@ export default function EcranScannerISBN() {
     const resultatSync = serviceSynchroQR.traiterScan(data);
     
     if (resultatSync.success) {
-      Alert.alert('Succès', resultatSync.message);
-      navigation.goBack();
+      if (resultatSync.type === 'CATALOGUE') {
+        (navigation as any).replace('ResumeImportation', { 
+          ajoutes: resultatSync.ajoutes, 
+          misAJour: resultatSync.misAJour 
+        });
+      } else if (resultatSync.type === 'TRANSACTIONS') {
+        (navigation as any).replace('ResumeTransactions', { 
+          delta: resultatSync.delta 
+        });
+      } else {
+        Alert.alert('Succès', resultatSync.message || 'Synchronisation réussie.');
+        navigation.goBack();
+      }
       return;
     }
 

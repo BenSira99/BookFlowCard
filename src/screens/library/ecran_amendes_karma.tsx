@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, Dimensions, Alert } from 'react-native';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle,
@@ -11,7 +11,7 @@ import Animated, {
   FadeIn
 } from 'react-native-reanimated';
 import { couleurs } from '../../theme/couleurs';
-import { utiliserMagasinBibliotheque } from '../../store/magasin_bibliotheque';
+import { utiliserMagasinTransactions } from '../../store/magasin_transactions';
 import { JaugeKarmaLiquide } from '../../components/library/jauge_karma_liquide';
 import { BoutonPaiement } from '../../components/library/bouton_paiement';
 
@@ -22,9 +22,13 @@ const { width } = Dimensions.get('window');
  * Si une amende est présente, un effet "Glitch" est appliqué sur son conteneur.
  */
 export default function EcranAmendesKarma() {
-  const { scoreKarma, amendes, payerAmende } = utiliserMagasinBibliotheque();
+  const { amendes } = utiliserMagasinTransactions();
   
-  const amendeActive = amendes.find(a => !a.estPayee);
+  const listeAmendes = Object.values(amendes);
+  const amendeActive = listeAmendes.find(a => a.statut?.toLowerCase() === 'impayée');
+  
+  // Simulation de score karma basé sur les amendes impayées
+  const scoreKarma = amendeActive ? 30 : 95;
 
   // Valeurs pour l'effet Glitch (si amende)
   const glitchX = useSharedValue(0);
@@ -72,9 +76,11 @@ export default function EcranAmendesKarma() {
   }));
 
   const gererPaiement = async () => {
-    if (!amendeActive) return false;
-    // Appel du magasin (simulation API)
-    return await payerAmende(amendeActive.id);
+    Alert.alert(
+      'Paiement au Guichet',
+      'Le paiement des amendes s\'effectue physiquement au guichet de la bibliothèque. Votre application se mettra à jour lors du prochain scan.'
+    );
+    return false;
   };
 
   return (
@@ -97,8 +103,8 @@ export default function EcranAmendesKarma() {
              <Text style={styles.texteAlerte}>⚠️ ATTENTION REQUISE</Text>
              
              <View style={styles.contenuSanction}>
-               <Text style={styles.motifAlerte}>{amendeActive.motif}</Text>
-               <Text style={styles.montantAlerte}>{amendeActive.montant.toFixed(2)} €</Text>
+               <Text style={styles.motifAlerte}>{amendeActive.motif || 'Reliquat de frais'}</Text>
+               <Text style={styles.montantAlerte}>{amendeActive.montant ? amendeActive.montant.toFixed(0) : '0'} FCFA</Text>
              </View>
 
              <BoutonPaiement surPayer={gererPaiement} />

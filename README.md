@@ -1,4 +1,4 @@
-# BiblioCard (BookFlow Card)
+# BookFlow Card
 
 ## 📋 Description
 Application mobile React Native **Premium** pour la gestion des adhérents d'une bibliothèque. Conçue avec une expérience utilisateur fluide, des animations de pointe et une sécurité rigoureuse, elle transforme la carte de bibliothèque physique en un compagnon numérique intelligent.

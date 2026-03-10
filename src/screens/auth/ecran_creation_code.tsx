@@ -3,8 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { couleurs } from '../../theme/couleurs';
 import { ClavierNumerique } from '../../components/common/clavier_numerique';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming, withRepeat } from 'react-native-reanimated';
-import { cryptoUtils } from '../../utils/crypto_utils';
-import { stockageSecurise } from '../../utils/stockage_securise';
+import { utiliserMagasinSecurite } from '../../store/magasin_securite';
 import { Alert } from 'react-native';
 
 export default function EcranCreationCode({ navigation }: any) {
@@ -12,6 +11,8 @@ export default function EcranCreationCode({ navigation }: any) {
   const [etape, setEtape] = useState<'creation' | 'confirmation'>('creation');
   const [pinTemp, setPinTemp] = useState('');
   const shakeAnimation = useSharedValue(0);
+
+  const { initialiserPin } = utiliserMagasinSecurite();
 
   const LONGUEUR_PIN = 6;
 
@@ -55,11 +56,8 @@ export default function EcranCreationCode({ navigation }: any) {
     } else {
       if (codeSaisi === pinTemp) {
         try {
-          // 1. Hachage du PIN (Sécurité SHA-256)
-          const hashPin = await cryptoUtils.hacherPIN(codeSaisi);
-          
-          // 2. Stockage sécurisé du Hash (SecureStore/Keychain)
-          await stockageSecurise.sauvegarder('USER_PIN_HASH', hashPin);
+          // Utilisation du magasin sécurisé (OWASP M2/M4/M5)
+          await initialiserPin(codeSaisi);
           
           // Redirection vers config biométrique ou completion
           navigation.navigate('ConfigurationBiometrie');

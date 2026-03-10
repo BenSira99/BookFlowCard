@@ -9,6 +9,8 @@ import EcranProfil from '../screens/profile/ecran_profil';
 import NavigateurBibliotheque from './navigateur_bibliotheque';
 import EcranNotifications from '../screens/notifications/ecran_notifications';
 import EcranPartageRadar from '../screens/share/ecran_partage_radar';
+import EcranResumeImportation from '../screens/share/ecran_resume_importation';
+import EcranResumeTransactions from '../screens/share/ecran_resume_transactions';
 import { IconeClocheAnimee } from '../components/notifications/icone_cloche_animee';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -84,7 +86,17 @@ export default function NavigateurPrincipal() {
       <StackPrincipal.Screen 
         name="PartageRadar" 
         component={EcranPartageRadar} 
-        options={{ presentation: 'modal' }} // S'ouvre de bas en haut
+        options={{ presentation: 'modal' }} 
+      />
+      <StackPrincipal.Screen 
+        name="ResumeImportation" 
+        component={EcranResumeImportation} 
+        options={{ title: 'Résumé de Synchronisation', headerShown: true }}
+      />
+      <StackPrincipal.Screen 
+        name="ResumeTransactions" 
+        component={EcranResumeTransactions} 
+        options={{ title: 'Détails Transaction', headerShown: true }}
       />
     </StackPrincipal.Navigator>
   );

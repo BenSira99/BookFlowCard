@@ -24,6 +24,56 @@ const SchemaEmprunt = z.object({
   nbProlongations: z.number(),
 });
 
+// Schémas pour la synchronisation transactionnelle (émis par l'App Desktop)
+export const SchemaTransactionEmprunt = z.object({
+  id_emprunt: z.number().or(z.string()),
+  date_emprunt: z.string().nullable().optional(),
+  date_retour_prevue: z.string().nullable().optional(),
+  statut: z.string().nullable().optional(),
+  date_d_amende: z.string().nullable().optional(),
+  id_ressource: z.number().or(z.string()).nullable().optional(),
+  titre: z.string().nullable().optional(),
+  auteur: z.string().nullable().optional(),
+  type_ressource: z.string().nullable().optional(),
+  nom_emprunteur: z.string().nullable().optional(),
+  prenom_emprunteur: z.string().nullable().optional(),
+}).passthrough();
+
+export const SchemaTransactionReservation = z.object({
+  id_reservation: z.number().or(z.string()),
+  date_reservation: z.string().nullable().optional(),
+  date_expiration_reservation: z.string().nullable().optional(),
+  statut: z.string().nullable().optional(),
+  date_annulation_reservation: z.string().nullable().optional(),
+  id_ressource: z.number().or(z.string()).nullable().optional(),
+  titre: z.string().nullable().optional(),
+  auteur: z.string().nullable().optional(),
+  type_ressource: z.string().nullable().optional(),
+  nom_reservant: z.string().nullable().optional(),
+  prenom_reservant: z.string().nullable().optional(),
+}).passthrough();
+
+export const SchemaTransactionAmende = z.object({
+  id_amende: z.number().or(z.string()),
+  montant: z.number().nullable().optional(),
+  motif: z.string().nullable().optional(),
+  date_emission: z.string().nullable().optional(),
+  statut: z.string().nullable().optional(),
+  emprunt_id: z.number().or(z.string()).nullable().optional(),
+  id_ressource: z.number().or(z.string()).nullable().optional(),
+  titre: z.string().nullable().optional(),
+  auteur: z.string().nullable().optional(),
+  nom_amende: z.string().nullable().optional(),
+  prenom_amende: z.string().nullable().optional(),
+}).passthrough();
+
+export const SchemaPayloadTransactions = z.object({
+  user_id: z.number().or(z.string()).optional(), // peut être absent selon la méthode d'appel
+  emprunts: z.array(SchemaTransactionEmprunt).optional(),
+  reservations: z.array(SchemaTransactionReservation).optional(),
+  amendes: z.array(SchemaTransactionAmende).optional(),
+});
+
 const SchemaMembre = z.object({
   id: z.string(),
   nom: z.string(),
@@ -115,7 +165,7 @@ export type DonneesInscriptionDesktopJSON = z.infer<typeof SchemaInscriptionDesk
  * Valide et parse une chaîne issue d'un scan QR (Format JSON ou Desktop).
  */
 export const validerDonneesQR = (source: string): 
-  | { success: true, data: any, format: 'JSON_SYNCHRO' | 'JSON_INSCRIPTION' | 'DESKTOP_COURT' } 
+  | { success: true, data: any, format: 'JSON_SYNCHRO' | 'JSON_INSCRIPTION' | 'DESKTOP_COURT' | 'JSON_TRANSACTIONS' } 
   | { success: false, error: string } => {
   
   // 1. Tenter le format JSON
@@ -133,8 +183,16 @@ export const validerDonneesQR = (source: string):
     if (validationSynchro.success) {
       return { success: true, format: 'JSON_SYNCHRO', data: validationSynchro.data };
     }
+
+    // C. Validation Transactions (Emprunts, Réservations, Amendes depuis génératon Desktop)
+    const validationTransactions = SchemaPayloadTransactions.safeParse(objet);
+    // On s'assure qu'au moins un des tableaux est présent, sinon ce n'est pas ce format
+    if (validationTransactions.success && 
+        (objet.emprunts !== undefined || objet.reservations !== undefined || objet.amendes !== undefined)) {
+      return { success: true, format: 'JSON_TRANSACTIONS', data: validationTransactions.data };
+    }
     
-    console.warn("Erreurs Zod (Inscription / Synchro): ", validationInscription.error?.message);
+    console.warn("Erreurs Zod (Inscription / Synchro / Transactions): ", validationInscription.error?.message);
     return { success: false, error: 'SCHEMA_INVALIDE' };
     
   } catch (e) {

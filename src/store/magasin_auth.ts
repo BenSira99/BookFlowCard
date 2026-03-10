@@ -11,9 +11,11 @@ export interface Utilisateur {
   sexe?: string;
   telephone?: string;
   dateInscription?: string;
+  pseudonyme?: string;
+  dateExpiration?: string;
+  secretQR?: string;
+  photo?: string;
   
-  // Enregistrement des détails complets formatés en JSON string 
-  // Ou accessible individuellement selon les besoins futurs.
   donneesBrutes?: any; 
 }
 

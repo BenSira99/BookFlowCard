@@ -76,7 +76,7 @@ export default function EcranChangementPin() {
       {[1, 2, 3, 4].map((i) => (
         <View 
           key={i} 
-          style={[styles.point, code.length >= i && styles.pointRempli, erreur && styles.pointErreur]} 
+          style={[styles.point, code.length >= i && styles.pointRempli, !!erreur && styles.pointErreur]} 
         />
       ))}
     </View>

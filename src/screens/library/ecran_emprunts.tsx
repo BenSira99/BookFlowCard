@@ -3,29 +3,26 @@ import { StyleSheet, View, Text, ScrollView, Alert } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { couleurs } from '../../theme/couleurs';
-import { utiliserMagasinBibliotheque } from '../../store/magasin_bibliotheque';
+import { utiliserMagasinTransactions, TransactionEmprunt } from '../../store/magasin_transactions';
 import { CarteLivreEmprunte } from '../../components/library/carte_livre_emprunte';
 
 /**
  * Écran d'affichage des Emprunts en cours.
- * Interactions : Swipe horizontal, bouton de validation de retour avec vol 3D.
+ * Chargé depuis le magasin synchronisé avec l'App Desktop.
  */
 export default function EcranEmprunts() {
-  const { emprunts, prolongerEmprunt, retournerEmprunt } = utiliserMagasinBibliotheque();
+  const { emprunts } = utiliserMagasinTransactions();
+  
+  // Convertir le Record en tableau et filtrer les emprunts actifs
+  const listeEmprunts = Object.values(emprunts);
+  const actifs = listeEmprunts.filter(e => e.statut?.toLowerCase() !== 'retourné');
 
-  // Filtrer uniquement les emprunts non retournés
-  const actifs = emprunts.filter(e => !e.estRetourne);
-
-  const gererProlongation = async (id: string) => {
-    const success = await prolongerEmprunt(id);
-    if (success) {
-      Alert.alert('Succès', 'Votre emprunt a été prolongé !');
-    }
+  const gererProlongation = (id: string) => {
+    Alert.alert('Info', 'Veuillez vous présenter au guichet pour prolonger cet emprunt.');
   };
 
   const gererRetour = (id: string) => {
-    // La carte va déclencher cette fonction APRÈS son animation
-    retournerEmprunt(id);
+    Alert.alert('Info', 'Livre à retourner physiquement à la bibliothèque.');
   };
 
   return (
@@ -42,10 +39,10 @@ export default function EcranEmprunts() {
 
         {actifs.map((emprunt) => (
           <CarteLivreEmprunte 
-             key={emprunt.id} 
+             key={String(emprunt.id_emprunt)} 
              emprunt={emprunt} 
-             surProlonger={gererProlongation}
-             surRetourner={gererRetour}
+             surProlonger={() => gererProlongation(String(emprunt.id_emprunt))}
+             surRetourner={() => gererRetour(String(emprunt.id_emprunt))}
           />
         ))}
 

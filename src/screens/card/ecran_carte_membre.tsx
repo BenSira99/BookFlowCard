@@ -32,6 +32,9 @@ export default function EcranCarteMembre() {
   const [estPleinEcran, setEstPleinEcran] = useState(false);
   const [luminositeInitiale, setLuminositeInitiale] = useState<number | null>(null);
 
+  // Protection contre le vol de données (M2, M8, M9, CWE-319)
+  ScreenCapture.usePreventScreenCapture();
+
   // Animation d'ouverture
   const yOuverture = useSharedValue(-200);
   useEffect(() => {
@@ -44,11 +47,6 @@ export default function EcranCarteMembre() {
       let actif = true;
 
       const activerSecurite = async () => {
-        // Protection Screenshot (CWE-319 / OWASP M8)
-        if (Platform.OS === 'android') {
-          await ScreenCapture.preventScreenCaptureAsync();
-        }
-        
         // Luminosité Auto (UX Scan)
         const { status } = await Brightness.requestPermissionsAsync();
         if (status === 'granted') {

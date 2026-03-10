@@ -1,35 +1,35 @@
 {
   "expo": {
-    "name": "BookFlowCard",
+    "name": "BookFlow Card",
     "slug": "BookFlowCard",
     "version": "1.0.0",
     "scheme": "bookflowcard",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/BookFlowCard.png",
+    "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/BookFlowCard.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0F172A"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bensira99.bookflowcard",
+      "icon": "./assets/BookFlowCard.png"
     },
     "android": {
+      "package": "com.bensira99.bookflowcard",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#0F172A",
+        "foregroundImage": "./assets/BookFlowCard.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/BookFlowCard.png"
     },
     "plugins": [
-      "expo-secure-store",
-      "expo-sharing"
+      "expo-secure-store"
     ]
   }
 }
