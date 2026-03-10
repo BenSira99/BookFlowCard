@@ -4,8 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { couleurs } from '../theme/couleurs';
 
 import EcranAccueil from '../screens/app/ecran_accueil';
-import EcranCarte from '../screens/app/ecran_carte';
-import EcranProfilPlaceholder from '../screens/app/ecran_profil_placeholder'; // à créer brièvement
+import EcranCarteMembre from '../screens/card/ecran_carte_membre';
+import EcranProfil from '../screens/profile/ecran_profil';
 
 const Onglets = createBottomTabNavigator();
 
@@ -45,12 +45,12 @@ export default function NavigateurPrincipal() {
       />
       <Onglets.Screen 
         name="Carte" 
-        component={EcranCarte} 
+        component={EcranCarteMembre} 
         options={{ title: 'Ma Carte' }}
       />
       <Onglets.Screen 
         name="Profil" 
-        component={EcranProfilPlaceholder} 
+        component={EcranProfil} 
         options={{ title: 'Profil' }}
       />
     </Onglets.Navigator>
