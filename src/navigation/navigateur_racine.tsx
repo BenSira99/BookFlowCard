@@ -12,6 +12,8 @@ import EcranCatalogue from '../screens/catalog/ecran_catalogue';
 import EcranScannerISBN from '../screens/catalog/ecran_scanner_isbn';
 import EcranDetailsLivre from '../screens/catalog/ecran_details_livre';
 import EcranInfosBibliotheque from '../screens/info/ecran_infos_bibliotheque';
+import EcranParametres from '../screens/settings/ecran_parametres';
+import EcranChangementPin from '../screens/settings/ecran_changement_pin';
 
 const PileReseau = createNativeStackNavigator();
 
@@ -69,6 +71,16 @@ export default function NavigateurRacine() {
               name="InfosBiblio" 
               component={EcranInfosBibliotheque} 
               options={{ animation: 'fade_from_bottom' }}
+            />
+            <PileReseau.Screen 
+              name="Parametres" 
+              component={EcranParametres} 
+              options={{ animation: 'slide_from_right' }}
+            />
+            <PileReseau.Screen 
+              name="ChangementPin" 
+              component={EcranChangementPin} 
+              options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
             />
           </>
         )}

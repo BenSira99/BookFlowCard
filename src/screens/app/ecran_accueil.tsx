@@ -98,6 +98,11 @@ export default function EcranAccueil() {
               titre="Infos" 
               onPress={() => (navigation as any).navigate('InfosBiblio')} 
             />
+            <BoutonAction 
+              icone="settings-outline" 
+              titre="Settings" 
+              onPress={() => (navigation as any).navigate('Parametres')} 
+            />
             <BoutonAction icone="calendar-outline" titre="Réservations" />
             <BoutonAction icone="time-outline" titre="Historique" />
           </View>
