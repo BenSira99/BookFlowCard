@@ -7,6 +7,7 @@ import { couleurs } from '../theme/couleurs';
 import { utiliserMagasinAuth } from '../store/magasin_auth';
 import NavigateurAuth from './navigateur_auth';
 import NavigateurPrincipal from './navigateur_principal';
+import EcranStatistiquesDetaillees from '../screens/statistics/ecran_statistiques_detaillees';
 
 const PileReseau = createNativeStackNavigator();
 
@@ -38,7 +39,14 @@ export default function NavigateurRacine() {
         {!estConnecte ? (
           <PileReseau.Screen name="Auth" component={NavigateurAuth} />
         ) : (
-          <PileReseau.Screen name="Main" component={NavigateurPrincipal} />
+          <>
+            <PileReseau.Screen name="Main" component={NavigateurPrincipal} />
+            <PileReseau.Screen 
+              name="StatsDetaillees" 
+              component={EcranStatistiquesDetaillees} 
+              options={{ animation: 'slide_from_right' }}
+            />
+          </>
         )}
       </PileReseau.Navigator>
     </NavigationContainer>

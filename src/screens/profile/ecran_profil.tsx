@@ -22,6 +22,7 @@ import Animated, {
   withSpring,
   FadeIn
 } from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native';
 
 import { couleurs } from '../../theme/couleurs';
 import { utiliserMagasinAuth } from '../../store/magasin_auth';
@@ -35,6 +36,7 @@ const { width } = Dimensions.get('window');
 const HEADER_HEIGHT = 280;
 
 export default function EcranProfil() {
+  const navigation = useNavigation();
   const { utilisateur, deconnecter } = utiliserMagasinAuth();
   const [photoUri, setPhotoUri] = useState<string | undefined>(undefined);
   const [enChargement, setEnChargement] = useState(false);
@@ -170,11 +172,19 @@ export default function EcranProfil() {
         <View style={styles.spacer} />
         
         {/* Statistiques */}
-        <View style={styles.statsContainer}>
+        <TouchableOpacity 
+          style={styles.statsContainer} 
+          activeOpacity={0.7}
+          onPress={() => (navigation as any).navigate('StatsDetaillees')}
+        >
           <StatistiqueAnimee label="Livres lus" valeurCible={42} delai={500} />
           <StatistiqueAnimee label="Emprunts" valeurCible={3} suffixe="/5" delai={700} />
           <StatistiqueAnimee label="Années" valeurCible={2} delai={900} />
-        </View>
+          
+          <View style={styles.badgeDetailStats}>
+            <Ionicons name="chevron-forward" size={12} color="white" />
+          </View>
+        </TouchableOpacity>
 
         <SectionProfil titre="Informations Personnelles" index={1}>
           <ItemProfil label="Prénom" valeur={utilisateur?.prenom || ''} icone="person-outline" />
@@ -282,5 +292,18 @@ const styles = StyleSheet.create({
     color: couleurs.erreur,
     fontSize: 16,
     fontWeight: '600',
+  },
+  badgeDetailStats: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: couleurs.primaire,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: couleurs.arrierePlan,
   },
 });
