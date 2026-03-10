@@ -7,6 +7,8 @@ import EcranAccueil from '../screens/app/ecran_accueil';
 import EcranCarteMembre from '../screens/card/ecran_carte_membre';
 import EcranProfil from '../screens/profile/ecran_profil';
 import NavigateurBibliotheque from './navigateur_bibliotheque';
+import EcranNotifications from '../screens/notifications/ecran_notifications';
+import { IconeClocheAnimee } from '../components/notifications/icone_cloche_animee';
 
 const Onglets = createBottomTabNavigator();
 
@@ -33,6 +35,8 @@ export default function NavigateurPrincipal() {
             nomIcone = focused ? 'qr-code' : 'qr-code-outline';
           } else if (route.name === 'Bibliotheque') {
             nomIcone = focused ? 'library' : 'library-outline';
+          } else if (route.name === 'Notifications') {
+            return <IconeClocheAnimee focused={focused} color={color} size={size} />;
           } else if (route.name === 'Profil') {
             nomIcone = focused ? 'person' : 'person-outline';
           }
@@ -55,6 +59,11 @@ export default function NavigateurPrincipal() {
         name="Bibliotheque" 
         component={NavigateurBibliotheque} 
         options={{ title: 'Mes Livres' }}
+      />
+      <Onglets.Screen 
+        name="Notifications" 
+        component={EcranNotifications} 
+        options={{ title: 'Alertes' }}
       />
       <Onglets.Screen 
         name="Profil" 

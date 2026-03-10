@@ -14,6 +14,7 @@
     "@react-navigation/material-top-tabs": "^7.4.18",
     "@react-navigation/native": "^7.1.33",
     "@react-navigation/native-stack": "^7.14.4",
+    "date-fns": "^4.1.0",
     "expo": "~55.0.5",
     "expo-blur": "~55.0.8",
     "expo-brightness": "~55.0.8",
