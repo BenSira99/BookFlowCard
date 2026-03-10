@@ -47,7 +47,7 @@ const ParticuleXP = ({ delai }: { delai: number }) => {
   }));
 
   return (
-    <Animated.View style={[styles.particule, styleAnime, { left: Math.random() * 100 + '%' }]} />
+    <Animated.View style={[styles.particule, styleAnime, { left: `${Math.random() * 100}%` as any }]} />
   );
 };
 

@@ -10,7 +10,7 @@ import Animated, {
   Easing,
   FadeIn
 } from 'react-native-reanimated';
-import { Camera, CameraView } from 'expo-camera'; // Pour Expo SDK 50+
+import { CameraView, useCameraPermissions } from 'expo-camera'; // SDK 55
 import { couleurs } from '../../theme/couleurs';
 import { utiliserMagasinCatalogue } from '../../store/magasin_catalogue';
 
@@ -19,7 +19,7 @@ const { width } = Dimensions.get('window');
 export default function EcranScannerISBN() {
   const navigation = useNavigation();
   const laserY = useSharedValue(0);
-  const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [permission, requestPermission] = useCameraPermissions();
   const { rechercherParISBN } = utiliserMagasinCatalogue();
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function EcranScannerISBN() {
       <CameraView 
         style={StyleSheet.absoluteFillObject}
         onBarcodeScanned={({ data }) => gererScan(data)}
-        barcodeScannerSettings={{ barcodeTypes: ['ean13', 'isbn'] }}
+        barcodeScannerSettings={{ barcodeTypes: ['ean13'] }}
       />
       
       <View style={styles.overlay}>

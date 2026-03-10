@@ -18,6 +18,10 @@ import { utiliserMagasinParametres } from '../../store/magasin_parametres';
 import { InterrupteurPremium } from '../../components/settings/interrupteur_premium';
 import { SeparateurAnime } from '../../components/settings/separateur_anime';
 import { JaugeNettoyageCache } from '../../components/settings/jauge_nettoyage_cache';
+import { ModalDeconnexion } from '../../components/settings/modal_deconnexion';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 
 const OptionReglage = ({ icone, titre, sousTitre, type = 'chevron', valeur, onPress }: any) => {
   return (
@@ -37,7 +41,7 @@ const OptionReglage = ({ icone, titre, sousTitre, type = 'chevron', valeur, onPr
 
 export default function EcranParametres() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { 
     estModeSombre, setModeSombre, 
     estBiometrieActive, setBiometrie,
@@ -48,6 +52,18 @@ export default function EcranParametres() {
   const [nettoyageEnCours, setNettoyageEnCours] = React.useState(false);
   const [nettoyageTermine, setNettoyageTermine] = React.useState(false);
   const [modalDeconnexionVisible, setModalDeconnexionVisible] = React.useState(false);
+
+  const gererNettoyage = async () => {
+    setNettoyageEnCours(true);
+    setNettoyageTermine(false);
+    await viderCache();
+    setNettoyageEnCours(false);
+    setNettoyageTermine(true);
+    
+    setTimeout(() => {
+        setNettoyageTermine(false);
+    }, 3000);
+  };
 
   // Animation thème
   const scaleTheme = useSharedValue(0);
