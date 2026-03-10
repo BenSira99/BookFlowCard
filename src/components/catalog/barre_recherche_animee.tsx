@@ -90,7 +90,6 @@ const styles = StyleSheet.create({
     bottom: 5,
     backgroundColor: couleurs.primaire,
     borderRadius: 15,
-    blurRadius: 20, // Simulatif via opacité dans Animated
   },
   conteneur: {
     flexDirection: 'row',
