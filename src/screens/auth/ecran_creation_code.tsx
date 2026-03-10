@@ -3,6 +3,9 @@ import { View, Text, StyleSheet } from 'react-native';
 import { couleurs } from '../../theme/couleurs';
 import { ClavierNumerique } from '../../components/common/clavier_numerique';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming, withRepeat } from 'react-native-reanimated';
+import { cryptoUtils } from '../../utils/crypto_utils';
+import { stockageSecurise } from '../../utils/stockage_securise';
+import { Alert } from 'react-native';
 
 export default function EcranCreationCode({ navigation }: any) {
   const [pin, setPin] = useState('');
@@ -44,15 +47,27 @@ export default function EcranCreationCode({ navigation }: any) {
     }
   };
 
-  const testerValidation = (codeSaisi: string) => {
+  const testerValidation = async (codeSaisi: string) => {
     if (etape === 'creation') {
       setPinTemp(codeSaisi);
       setPin('');
       setEtape('confirmation');
     } else {
       if (codeSaisi === pinTemp) {
-        // Redirection vers config biométrique ou completion
-        navigation.navigate('ConfigurationBiometrie');
+        try {
+          // 1. Hachage du PIN (Sécurité SHA-256)
+          const hashPin = await cryptoUtils.hacherPIN(codeSaisi);
+          
+          // 2. Stockage sécurisé du Hash (SecureStore/Keychain)
+          await stockageSecurise.sauvegarder('USER_PIN_HASH', hashPin);
+          
+          // Redirection vers config biométrique ou completion
+          navigation.navigate('ConfigurationBiometrie');
+        } catch (error) {
+          Alert.alert('Erreur', 'Impossible de sécuriser le code PIN.');
+          secouerClavier();
+          setPin('');
+        }
       } else {
         // Erreur de confirmation
         secouerClavier();

@@ -6,6 +6,9 @@ import { couleurs } from '../../theme/couleurs';
 import { ClavierNumerique } from '../../components/common/clavier_numerique';
 import { utiliserMagasinAuth } from '../../store/magasin_auth';
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming, withRepeat } from 'react-native-reanimated';
+import { cryptoUtils } from '../../utils/crypto_utils';
+import { stockageSecurise } from '../../utils/stockage_securise';
+import { Alert } from 'react-native';
 
 export default function EcranConnexion() {
   const [pin, setPin] = useState('');
@@ -73,20 +76,37 @@ export default function EcranConnexion() {
     }
   };
 
-  const verifierPin = (codeSaisi: string) => {
-    // Dans l'app finale, on vérifie contre un hash chiffré stocké via Keychain
-    // Simulation:
-    if (codeSaisi === '123456') { // TODO: brancher AuthStore
-      simulerConnexion();
-    } else {
-      secouerClavier();
-      setPin('');
-      incrementerTentatives();
+  const verifierPin = async (codeSaisi: string) => {
+    try {
+      // 1. Récupération du hash stocké
+      const hashStocke = await stockageSecurise.recuperer('USER_PIN_HASH');
+      
+      if (!hashStocke) {
+        Alert.alert('Erreur', 'Aucun PIN configuré. Veuillez réinscrire la carte.');
+        return;
+      }
+
+      // 2. Vérification cryptographique
+      const estValide = await cryptoUtils.verifierPIN(codeSaisi, hashStocke);
+      
+      if (estValide) {
+        simulerConnexion();
+      } else {
+        secouerClavier();
+        setPin('');
+        incrementerTentatives();
+      }
+    } catch (error) {
+      console.error('Erreur lors de la vérification du PIN:', error);
+      Alert.alert('Erreur', "Problème lors de l'authentification.");
     }
   };
 
   const simulerConnexion = () => {
-    connecter('token_jwt_simule', {
+    const user = utiliserMagasinAuth.getState().utilisateur;
+    // Si l'utilisateur est déjà dans le store (ex: via QR), on le connecte
+    // Sinon on simule une connexion par défaut
+    connecter('token_jwt_local', user || {
       id: '1',
       nom: 'Dupont',
       prenom: 'Jean',

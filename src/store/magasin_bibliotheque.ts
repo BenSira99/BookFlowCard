@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Types pour le Module Emprunts
 export interface Emprunt {
@@ -107,76 +109,84 @@ const amendesInitiales: Amende[] = [
   }
 ];
 
-export const utiliserMagasinBibliotheque = create<EtatBibliotheque>((set, get) => ({
-  emprunts: empruntsInitiaux,
-  reservations: reservationsInitiales,
-  amendes: amendesInitiales,
-  scoreKarma: 45, // Score initial simulé (faible à cause du retard et de l'amende)
+export const utiliserMagasinBibliotheque = create<EtatBibliotheque>()(
+  persist(
+    (set, get) => ({
+      emprunts: empruntsInitiaux,
+      reservations: reservationsInitiales,
+      amendes: amendesInitiales,
+      scoreKarma: 45, // Score initial simulé (faible à cause du retard et de l'amende)
 
-  prolongerEmprunt: async (id: string) => {
-    // Simulation d'appel réseau
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    set(etat => ({
-      emprunts: etat.emprunts.map(emp => {
-        if (emp.id === id && emp.renouvellementsEffectues < emp.renouvellementsMax) {
-          // Ajout de 14 jours
-          const nouvelleDate = new Date(emp.dateRetourPrevue);
-          nouvelleDate.setDate(nouvelleDate.getDate() + 14);
-          return {
-            ...emp,
-            dateRetourPrevue: nouvelleDate.toISOString(),
-            renouvellementsEffectues: emp.renouvellementsEffectues + 1,
-            estEnRetard: false, // Plus en retard après prolongation
+      prolongerEmprunt: async (id: string) => {
+        // Simulation d'appel réseau
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        set(etat => ({
+          emprunts: etat.emprunts.map(emp => {
+            if (emp.id === id && emp.renouvellementsEffectues < emp.renouvellementsMax) {
+              // Ajout de 14 jours
+              const nouvelleDate = new Date(emp.dateRetourPrevue);
+              nouvelleDate.setDate(nouvelleDate.getDate() + 14);
+              return {
+                ...emp,
+                dateRetourPrevue: nouvelleDate.toISOString(),
+                renouvellementsEffectues: emp.renouvellementsEffectues + 1,
+                estEnRetard: false, // Plus en retard après prolongation
+              };
+            }
+            return emp;
+          })
+        }));
+        return true; // Succès
+      },
+
+      retournerEmprunt: (id: string) => {
+        set(etat => {
+          const empruntsMaj = etat.emprunts.map(emp => 
+            emp.id === id ? { ...emp, estRetourne: true } : emp
+          );
+          // Retirer les emprunts retournés de la liste active pour l'animation
+          // Dans une vraie app, ils iraient dans l'historique
+          return { 
+            emprunts: empruntsMaj,
+            // Bonus Karma pour avoir ramené un livre
+            scoreKarma: Math.min(100, etat.scoreKarma + 10) 
           };
-        }
-        return emp;
-      })
-    }));
-    return true; // Succès
-  },
+        });
+      },
 
-  retournerEmprunt: (id: string) => {
-    set(etat => {
-      const empruntsMaj = etat.emprunts.map(emp => 
-        emp.id === id ? { ...emp, estRetourne: true } : emp
-      );
-      // Retirer les emprunts retournés de la liste active pour l'animation
-      // Dans une vraie app, ils iraient dans l'historique
-      return { 
-        emprunts: empruntsMaj,
-        // Bonus Karma pour avoir ramené un livre
-        scoreKarma: Math.min(100, etat.scoreKarma + 10) 
-      };
-    });
-  },
+      annulerReservation: (id: string) => {
+        set(etat => ({
+          reservations: etat.reservations.filter(res => res.id !== id)
+        }));
+      },
 
-  annulerReservation: (id: string) => {
-    set(etat => ({
-      reservations: etat.reservations.filter(res => res.id !== id)
-    }));
-  },
+      payerAmende: async (id: string) => {
+        // Simulation d'appel réseau pour le paiement multiplateforme
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        set(etat => ({
+          amendes: etat.amendes.map(amd => 
+            amd.id === id ? { ...amd, estPayee: true } : amd
+          ),
+          // Gros bonus Karma quand on paie ses dettes !
+          scoreKarma: Math.min(100, etat.scoreKarma + 30)
+        }));
+        return true;
+      },
 
-  payerAmende: async (id: string) => {
-    // Simulation d'appel réseau pour le paiement multiplateforme
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    set(etat => ({
-      amendes: etat.amendes.map(amd => 
-        amd.id === id ? { ...amd, estPayee: true } : amd
-      ),
-      // Gros bonus Karma quand on paie ses dettes !
-      scoreKarma: Math.min(100, etat.scoreKarma + 30)
-    }));
-    return true;
-  },
-
-  importerSession: (donnees) => {
-    set(etat => ({
-      emprunts: donnees.emprunts || etat.emprunts,
-      reservations: donnees.reservations || etat.reservations,
-      amendes: donnees.amendes || etat.amendes,
-      scoreKarma: donnees.scoreKarma ?? etat.scoreKarma,
-    }));
-  }
-}));
+      importerSession: (donnees) => {
+        set(etat => ({
+          emprunts: donnees.emprunts || etat.emprunts,
+          reservations: donnees.reservations || etat.reservations,
+          amendes: donnees.amendes || etat.amendes,
+          scoreKarma: donnees.scoreKarma ?? etat.scoreKarma,
+        }));
+      }
+    }),
+    {
+      name: 'bibliotheque-storage', // Clé unique pour AsyncStorage
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
