@@ -6,6 +6,7 @@ import { couleurs } from '../theme/couleurs';
 import EcranAccueil from '../screens/app/ecran_accueil';
 import EcranCarteMembre from '../screens/card/ecran_carte_membre';
 import EcranProfil from '../screens/profile/ecran_profil';
+import NavigateurBibliotheque from './navigateur_bibliotheque';
 
 const Onglets = createBottomTabNavigator();
 
@@ -30,6 +31,8 @@ export default function NavigateurPrincipal() {
             nomIcone = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Carte') {
             nomIcone = focused ? 'qr-code' : 'qr-code-outline';
+          } else if (route.name === 'Bibliotheque') {
+            nomIcone = focused ? 'library' : 'library-outline';
           } else if (route.name === 'Profil') {
             nomIcone = focused ? 'person' : 'person-outline';
           }
@@ -47,6 +50,11 @@ export default function NavigateurPrincipal() {
         name="Carte" 
         component={EcranCarteMembre} 
         options={{ title: 'Ma Carte' }}
+      />
+      <Onglets.Screen 
+        name="Bibliotheque" 
+        component={NavigateurBibliotheque} 
+        options={{ title: 'Mes Livres' }}
       />
       <Onglets.Screen 
         name="Profil" 
