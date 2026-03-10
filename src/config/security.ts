@@ -1,0 +1,6 @@
+export const CONFIG_SECURITE = {
+  ALGORITHME_HASH: 'SHA-256',
+  CHIFFREMENT_LOCAL: 'AES-256-GCM',
+  SIGNATURE_REQUISE: true,
+  CLE_PUBLIQUE_BIBLIO: '---CLE_PUBLIQUE_SIMULEE---', // Pour valider l'origine des QR
+};

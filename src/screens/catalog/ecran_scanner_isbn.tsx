@@ -13,6 +13,8 @@ import Animated, {
 import { CameraView, useCameraPermissions } from 'expo-camera'; // SDK 55
 import { couleurs } from '../../theme/couleurs';
 import { utiliserMagasinCatalogue } from '../../store/magasin_catalogue';
+import { serviceSynchroQR } from '../../services/service_synchro_qr';
+import { Alert } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -50,6 +52,16 @@ export default function EcranScannerISBN() {
   }
 
   const gererScan = (data: string) => {
+    // 1. Tenter une synchronisation (QR JSON)
+    const resultatSync = serviceSynchroQR.traiterScan(data);
+    
+    if (resultatSync.success) {
+      Alert.alert('Succès', resultatSync.message);
+      navigation.goBack();
+      return;
+    }
+
+    // 2. Si ce n'est pas un QR de synchro, on teste l'ISBN
     const livre = rechercherParISBN(data);
     if (livre) {
       (navigation as any).navigate('DetailsLivre', { livreId: livre.id });
@@ -61,7 +73,7 @@ export default function EcranScannerISBN() {
       <CameraView 
         style={StyleSheet.absoluteFillObject}
         onBarcodeScanned={({ data }) => gererScan(data)}
-        barcodeScannerSettings={{ barcodeTypes: ['ean13'] }}
+        barcodeScannerSettings={{ barcodeTypes: ['ean13', 'qr'] }}
       />
       
       <View style={styles.overlay}>

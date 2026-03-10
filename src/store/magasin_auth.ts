@@ -21,6 +21,7 @@ interface EtatAuth {
   deverrouiller: () => void;
   incrementerTentatives: () => void;
   reinitialiserTentatives: () => void;
+  importerUtilisateur: (utilisateur: Utilisateur) => void;
 }
 
 export const utiliserMagasinAuth = create<EtatAuth>((set) => ({
@@ -59,5 +60,7 @@ export const utiliserMagasinAuth = create<EtatAuth>((set) => ({
     };
   }),
   
-  reinitialiserTentatives: () => set({ tentativesEchouees: 0 })
+  reinitialiserTentatives: () => set({ tentativesEchouees: 0 }),
+
+  importerUtilisateur: (utilisateur) => set({ utilisateur, estConnecte: true })
 }));

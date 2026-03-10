@@ -45,6 +45,7 @@ interface EtatBibliotheque {
   retournerEmprunt: (id: string) => void;
   annulerReservation: (id: string) => void;
   payerAmende: (id: string) => Promise<boolean>;
+  importerSession: (donnees: { emprunts?: Emprunt[], reservations?: Reservation[], amendes?: Amende[], scoreKarma?: number }) => void;
 }
 
 // Données initiales factices
@@ -168,5 +169,14 @@ export const utiliserMagasinBibliotheque = create<EtatBibliotheque>((set, get) =
       scoreKarma: Math.min(100, etat.scoreKarma + 30)
     }));
     return true;
+  },
+
+  importerSession: (donnees) => {
+    set(etat => ({
+      emprunts: donnees.emprunts || etat.emprunts,
+      reservations: donnees.reservations || etat.reservations,
+      amendes: donnees.amendes || etat.amendes,
+      scoreKarma: donnees.scoreKarma ?? etat.scoreKarma,
+    }));
   }
 }));

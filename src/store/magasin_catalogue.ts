@@ -31,6 +31,7 @@ interface EtatCatalogue {
   setFiltreCategorie: (id: string | null) => void;
   basculerFavori: (id: string) => void;
   rechercherParISBN: (isbn: string) => Livre | undefined;
+  importerLivres: (nouveauxLivres: Livre[]) => void;
 }
 
 export const utiliserMagasinCatalogue = create<EtatCatalogue>((set, get) => ({
@@ -110,5 +111,9 @@ export const utiliserMagasinCatalogue = create<EtatCatalogue>((set, get) => ({
 
   rechercherParISBN: (isbn) => {
     return get().livres.find(l => l.isbn === isbn);
+  },
+
+  importerLivres: (nouveauxLivres) => {
+    set({ livres: nouveauxLivres });
   }
 }));
