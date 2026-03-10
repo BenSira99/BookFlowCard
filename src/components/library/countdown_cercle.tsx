@@ -70,7 +70,7 @@ export const CountdownCercle = ({ joursRestants, estEnRetard, taille = 40 }: Pro
           origin={`${taille / 2}, ${taille / 2}`}
         />
       </Svg>
-      <View style={StyleSheet.absoluteFillObject} style={styles.conteneurTexte}>
+      <View style={[StyleSheet.absoluteFillObject, styles.conteneurTexte]}>
         <Text style={[styles.texte, { color: couleurAnneau }]}>
           {estEnRetard ? '!!' : joursRestants}
         </Text>

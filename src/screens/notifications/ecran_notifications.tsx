@@ -4,7 +4,6 @@ import Animated, {
   FadeIn, 
   FadeOut, 
   Layout, 
-  Transition,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

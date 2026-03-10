@@ -151,7 +151,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: couleurs.primaire,
     borderRadius: 15,
-    blurRadius: 20,
     opacity: 0.1,
     transform: [{ scale: 1.05 }],
   },

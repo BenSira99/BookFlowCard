@@ -89,7 +89,7 @@ export const JaugeKarmaLiquide = ({ score, taille }: ProprietesJaugeKarma) => {
       </Svg>
       
       {/* Texte superposé */}
-      <View style={StyleSheet.absoluteFillObject} style={styles.texteConteneur}>
+      <View style={[StyleSheet.absoluteFillObject, styles.texteConteneur]}>
         <Text style={styles.texteScore}>{score}</Text>
         <Text style={styles.texteLabel}>KARMA</Text>
       </View>
