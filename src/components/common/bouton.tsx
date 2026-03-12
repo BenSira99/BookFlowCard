@@ -7,9 +7,10 @@ interface ProprietesBouton {
   surClic: () => void;
   estChargeant?: boolean;
   type?: 'primaire' | 'secondaire' | 'danger';
+  style?: any;
 }
 
-export const Bouton = ({ titre, surClic, estChargeant = false, type = 'primaire' }: ProprietesBouton) => {
+export const Bouton = ({ titre, surClic, estChargeant = false, type = 'primaire', style }: ProprietesBouton) => {
   const obtenirStyleFond = () => {
     switch (type) {
       case 'secondaire': return styles.fondSecondaire;
@@ -28,7 +29,7 @@ export const Bouton = ({ titre, surClic, estChargeant = false, type = 'primaire'
 
   return (
     <TouchableOpacity 
-      style={[styles.bouton, obtenirStyleFond()]} 
+      style={[styles.bouton, obtenirStyleFond(), style]} 
       onPress={surClic} 
       disabled={estChargeant}
       activeOpacity={0.8}

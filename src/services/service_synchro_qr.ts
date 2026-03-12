@@ -117,6 +117,27 @@ export const serviceSynchroQR = {
       });
       return { success: true, type: 'INSCRIPTION', message: 'Inscription réussie (Format court).' };
     }
+    return { success: false, erreur: 'FORMAT_INSCRIPTION_INVALIDE' };
+  },
+
+  /**
+   * Analyse un QR code d'inscription sans importer les données.
+   * Utile pour la pré-visualisation avant validation.
+   */
+  analyserInscription: (chaine: string): any => {
+    const validation = validerDonneesQR(inputSanitizer.nettoyerTexte(chaine));
+    if (!validation.success) return { success: false, erreur: validation.error };
+
+    const format = validation.format;
+    const data = validation.data;
+
+    if (format === 'JSON_INSCRIPTION') {
+      return { success: true, format, data };
+    } 
+
+    if (format === 'DESKTOP_COURT') {
+      return { success: true, format, data };
+    }
 
     return { success: false, erreur: 'FORMAT_INSCRIPTION_INVALIDE' };
   }

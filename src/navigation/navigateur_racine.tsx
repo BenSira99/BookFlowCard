@@ -58,11 +58,6 @@ export default function NavigateurRacine() {
               options={{ animation: 'fade_from_bottom' }}
             />
             <PileReseau.Screen 
-              name="ScannerISBN" 
-              component={EcranScannerISBN} 
-              options={{ animation: 'slide_from_bottom', presentation: 'fullScreenModal' }}
-            />
-            <PileReseau.Screen 
               name="DetailsLivre" 
               component={EcranDetailsLivre} 
               options={{ animation: 'slide_from_right' }}
@@ -84,6 +79,11 @@ export default function NavigateurRacine() {
             />
           </>
         )}
+        <PileReseau.Screen 
+          name="ScannerISBN" 
+          component={EcranScannerISBN} 
+          options={{ animation: 'slide_from_bottom', presentation: 'fullScreenModal' }}
+        />
       </PileReseau.Navigator>
     </NavigationContainer>
   );

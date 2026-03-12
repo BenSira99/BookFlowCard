@@ -135,15 +135,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 40,
+    marginVertical: 20,
   },
   point: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     borderWidth: 2,
     borderColor: couleurs.bordure,
-    marginHorizontal: 12,
+    marginHorizontal: 10,
   },
   pointRempli: {
     backgroundColor: couleurs.primaire,
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   conteneurClavier: {
     flex: 1,
-    justifyContent: 'flex-end',
-    paddingBottom: 20,
+    justifyContent: 'center',
+    paddingBottom: 10,
   }
 });

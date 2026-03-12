@@ -29,7 +29,13 @@
       "favicon": "./assets/BookFlowCard.png"
     },
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "L'application a besoin d'accéder à la caméra pour scanner les QR codes."
+        }
+      ]
     ]
   }
 }

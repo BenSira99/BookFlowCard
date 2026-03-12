@@ -31,12 +31,16 @@ import { StatistiqueAnimee } from '../../components/profile/statistique_animee';
 import { SectionProfil } from '../../components/profile/section_profil';
 import { ItemProfil } from '../../components/profile/item_profil';
 import { AnneauProgres } from '../../components/profile/anneau_progres';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
-const HEADER_HEIGHT = 280;
+const BASE_HEADER_HEIGHT = 280;
 
 export default function EcranProfil() {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const HEADER_HEIGHT = BASE_HEADER_HEIGHT + insets.top;
+  
   const { utilisateur, deconnecter } = utiliserMagasinAuth();
   const [photoUri, setPhotoUri] = useState<string | undefined>(undefined);
   const [enChargement, setEnChargement] = useState(false);
@@ -103,8 +107,8 @@ export default function EcranProfil() {
   const styleHeader = useAnimatedStyle(() => {
     const height = interpolate(
       scrollY.value,
-      [0, HEADER_HEIGHT - 80],
-      [HEADER_HEIGHT, 80],
+      [0, HEADER_HEIGHT - (80 + insets.top)],
+      [HEADER_HEIGHT, 80 + insets.top],
       Extrapolate.CLAMP
     );
     return { height };
@@ -113,14 +117,14 @@ export default function EcranProfil() {
   const stylePhoto = useAnimatedStyle(() => {
     const scale = interpolate(
       scrollY.value,
-      [-100, 0, HEADER_HEIGHT - 80],
+      [-100, 0, HEADER_HEIGHT - (80 + insets.top)],
       [1.2, 1, 0.4],
       Extrapolate.CLAMP
     );
     const translateY = interpolate(
       scrollY.value,
-      [0, HEADER_HEIGHT - 80],
-      [0, -20],
+      [0, HEADER_HEIGHT - (80 + insets.top)],
+      [insets.top / 2, -10],
       Extrapolate.CLAMP
     );
     return {
@@ -131,7 +135,7 @@ export default function EcranProfil() {
   const styleTextes = useAnimatedStyle(() => {
     const opacity = interpolate(
       scrollY.value,
-      [0, HEADER_HEIGHT / 2],
+      [0, HEADER_HEIGHT / 1.5],
       [1, 0],
       Extrapolate.CLAMP
     );
@@ -169,7 +173,7 @@ export default function EcranProfil() {
         scrollEventThrottle={16}
         contentContainerStyle={styles.scrollContent}
       >
-        <View style={styles.spacer} />
+        <View style={{ height: HEADER_HEIGHT + 20 }} />
         
         {/* Statistiques */}
         <TouchableOpacity 
@@ -250,7 +254,6 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   conteneurPhoto: {
-    marginTop: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -284,9 +287,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-  },
-  spacer: {
-    height: HEADER_HEIGHT + 20,
   },
   statsContainer: {
     flexDirection: 'row',

@@ -1,103 +1,151 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { couleurs } from '../../theme/couleurs';
 import { Bouton } from '../../components/common/bouton';
-import { ChampTexte } from '../../components/common/champ_texte';
 import { serviceSynchroQR } from '../../services/service_synchro_qr';
+import { utiliserMagasinAuth } from '../../store/magasin_auth';
 import { Ionicons } from '@expo/vector-icons';
 import { Alert, TouchableOpacity } from 'react-native';
 
-export default function EcranActivation({ navigation }: any) {
-  const [code, setCode] = useState('');
-  const [erreur, setErreur] = useState('');
+export default function EcranActivation({ navigation, route }: any) {
+  const [donneesScannees, setDonneesScannees] = useState<any>(null);
   const [chargement, setChargement] = useState(false);
+  const { importerUtilisateur } = utiliserMagasinAuth();
 
-  const gererActivation = () => {
-    // Validation basique locale
-    if (code.length < 8) {
-      setErreur('Le code doit contenir au moins 8 caractères.');
-      return;
+  // Gestion du retour du scanner
+  useEffect(() => {
+    if (route.params?.qrData) {
+      const resultat = serviceSynchroQR.analyserInscription(route.params.qrData);
+      if (resultat.success) {
+        setDonneesScannees(resultat.data);
+      } else {
+        Alert.alert('Erreur', 'QR Code invalide pour l\'inscription.');
+      }
     }
-    
-    setErreur('');
-    setChargement(true);
-    
-    // Simulation réseau local
-    setTimeout(() => {
-      setChargement(false);
-      navigation.navigate('CreationCode');
-    }, 1500);
-  };
+  }, [route.params?.qrData]);
 
   const gererScanInscription = () => {
-    // On réutilise l'écran ScannerISBN mais paramétré ou on redirige vers un nouveau scanner dédié
-    // Pour simplifier, on navigue vers ScannerISBN qui gère déjà la synchro
-    (navigation as any).navigate('ScannerISBN');
+    (navigation as any).navigate('ScannerISBN', { mode: 'INSCRIPTION' });
+  };
+
+  const confirmerActivation = async () => {
+    if (!donneesScannees) return;
+
+    setChargement(true);
+    try {
+      // Normalisation et import (Logique extraite de serviceSynchroQR.traiterInscriptionDesktop)
+      const data = donneesScannees;
+      if (data.qr_code || data.infoSpecifique) {
+        importerUtilisateur({
+          id: data.qr_code || data.infoSpecifique,
+          nom: data.nom,
+          prenom: data.prenom,
+          dateExpiration: data.date_expiration || '',
+          typeRole: data.type as any,
+          photo: data.photo_profil || undefined,
+          secretQR: data.qr_code || data.infoSpecifique
+        });
+        
+        // Petit délai pour l'effet visuel
+        setTimeout(() => {
+          setChargement(false);
+          navigation.navigate('CreationCode');
+        }, 1000);
+      }
+    } catch (error) {
+      setChargement(false);
+      Alert.alert('Erreur', 'Impossible de valider l\'inscription.');
+    }
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={{ flex: 1, backgroundColor: couleurs.arrierePlan }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView contentContainerStyle={styles.conteneurScroll} keyboardShouldPersistTaps="handled">
+    <SafeAreaView style={styles.conteneur}>
+      <ScrollView contentContainerStyle={styles.conteneurScroll}>
         <View style={styles.entete}>
-          <Text style={styles.titre}>Activer votre Carte</Text>
+          <Text style={styles.titre}>Activation</Text>
           <Text style={styles.texte}>
-            Veuillez saisir le code d'activation fourni par le bibliothécaire lors de votre inscription.
+            {donneesScannees 
+              ? 'Vérifiez vos informations ci-dessous avant de valider l\'activation de votre carte.'
+              : 'Scannez le QR Code fourni par votre bibliothécaire pour activer votre carte numérique.'}
           </Text>
         </View>
 
-        <View style={styles.formulaire}>
-          <ChampTexte
-            label="Code d'activation"
-            valeur={code}
-            onChangeText={(txt) => {
-              setCode(txt.toUpperCase());
-              if(erreur) setErreur('');
-            }}
-            placeholder="Ex: ABCD-1234"
-            erreur={erreur}
-            icone="card-outline"
-          />
-        </View>
-
-        <View style={styles.actions}>
-          <Bouton 
-            titre="Valider le Code" 
-            surClic={gererActivation} 
-            estChargeant={chargement}
-          />
-          
-          <View style={styles.separateur}>
-            <View style={styles.ligne} />
-            <Text style={styles.texteSeparateur}>OU</Text>
-            <View style={styles.ligne} />
+        {!donneesScannees ? (
+          <View style={styles.conteneurActionInitiale}>
+            <TouchableOpacity 
+              style={styles.boutonScanPrincipal} 
+              onPress={gererScanInscription}
+              activeOpacity={0.8}
+            >
+              <View style={styles.cercleIcone}>
+                <Ionicons name="qr-code" size={60} color={couleurs.primaire} />
+              </View>
+              <Text style={styles.texteBoutonPrincipal}>Scanner le QR d'inscription</Text>
+            </TouchableOpacity>
           </View>
+        ) : (
+          <View style={styles.carteRecapitulatif}>
+             <View style={styles.ligneInfo}>
+                <View style={styles.avatarPlaceholder}>
+                   {donneesScannees.photo_profil ? (
+                     <Image source={{ uri: donneesScannees.photo_profil }} style={styles.avatar} />
+                   ) : (
+                     <Ionicons name="person" size={40} color={couleurs.texteSecondaire} />
+                   )}
+                </View>
+                <View style={styles.colonnesTexte}>
+                   <Text style={styles.label}>Membre</Text>
+                   <Text style={styles.valeur}>{donneesScannees.nom} {donneesScannees.prenom}</Text>
+                </View>
+             </View>
 
-          <TouchableOpacity 
-            style={styles.boutonScan} 
-            onPress={gererScanInscription}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="qr-code-outline" size={24} color="white" />
-            <Text style={styles.texteBoutonScan}>Scanner QR Inscription</Text>
-          </TouchableOpacity>
-        </View>
+             <View style={styles.separateur} />
+
+             <View style={styles.grilleInfos}>
+                <View style={styles.itemInfo}>
+                   <Text style={styles.label}>Type / Rôle</Text>
+                   <Text style={styles.valeur}>{donneesScannees.type?.toUpperCase()}</Text>
+                </View>
+                {donneesScannees.classe && (
+                  <View style={styles.itemInfo}>
+                    <Text style={styles.label}>Classe</Text>
+                    <Text style={styles.valeur}>{donneesScannees.classe}</Text>
+                  </View>
+                )}
+             </View>
+
+             <Bouton 
+               titre="Confirmer et Continuer" 
+               surClic={confirmerActivation} 
+               estChargeant={chargement}
+               style={styles.boutonValider}
+             />
+             
+             <TouchableOpacity 
+               onPress={() => setDonneesScannees(null)}
+               style={styles.boutonReessayer}
+             >
+               <Text style={styles.texteReessayer}>Re-scanner un autre code</Text>
+             </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  conteneur: {
+    flex: 1, 
+    backgroundColor: couleurs.arrierePlan 
+  },
   conteneurScroll: {
     flexGrow: 1,
     padding: 24,
-    justifyContent: 'space-between',
   },
   entete: {
-    marginTop: 40,
-    marginBottom: 30,
+    marginBottom: 40,
   },
   titre: {
     fontSize: 32,
@@ -110,44 +158,99 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
   },
-  formulaire: {
+  conteneurActionInitiale: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 100,
   },
-  actions: {
-    paddingBottom: 20,
-    marginTop: 40,
+  boutonScanPrincipal: {
+    alignItems: 'center',
+    gap: 20,
+  },
+  cercleIcone: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: 'rgba(13, 148, 136, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: couleurs.primaire,
+    borderStyle: 'dashed',
+  },
+  texteBoutonPrincipal: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  carteRecapitulatif: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  ligneInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 20,
+  },
+  avatarPlaceholder: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+  },
+  colonnesTexte: {
+    flex: 1,
+  },
+  label: {
+    color: couleurs.texteSecondaire,
+    fontSize: 13,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  valeur: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   separateur: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  ligne: {
-    flex: 1,
     height: 1,
     backgroundColor: 'rgba(255,255,255,0.1)',
+    marginVertical: 20,
   },
-  texteSeparateur: {
-    color: couleurs.texteSecondaire,
-    marginHorizontal: 15,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  boutonScan: {
+  grilleInfos: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(13, 148, 136, 0.2)',
-    paddingVertical: 15,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: couleurs.primaire,
-    gap: 10,
+    flexWrap: 'wrap',
+    gap: 24,
+    marginBottom: 30,
   },
-  texteBoutonScan: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
+  itemInfo: {
+    minWidth: '40%',
+  },
+  boutonValider: {
+    marginTop: 10,
+  },
+  boutonReessayer: {
+    marginTop: 20,
+    padding: 10,
+    alignItems: 'center',
+  },
+  texteReessayer: {
+    color: couleurs.texteSecondaire,
+    fontSize: 14,
+    textDecorationLine: 'underline',
   }
 });

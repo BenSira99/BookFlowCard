@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { couleurs } from '../../theme/couleurs';
@@ -8,6 +9,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 
 export default function EcranAccueil() {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const { utilisateur, deconnecter } = utiliserMagasinAuth();
   const [rafraichissement, setRafraichissement] = React.useState(false);
 
@@ -21,7 +23,7 @@ export default function EcranAccueil() {
 
   return (
     <View style={styles.conteneurGlobal}>
-      <View style={styles.entete}>
+      <View style={[styles.entete, { paddingTop: Math.max(insets.top, 20) }]}>
         <View style={styles.profil}>
           <TouchableOpacity 
             style={styles.avatar} 
@@ -134,7 +136,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 60,
     paddingBottom: 20,
     backgroundColor: couleurs.carteArrierePlan,
     borderBottomWidth: 1,

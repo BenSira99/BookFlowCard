@@ -27,6 +27,8 @@ const { width, height } = Dimensions.get('window');
  * Animations : Ouverture Spring, Expansion Plein Écran, Blur Navy.
  * Sécurité : Protection Screenshot & Luminosité Auto.
  */
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 export default function EcranCarteMembre() {
   const { utilisateur } = utiliserMagasinAuth();
   const [estPleinEcran, setEstPleinEcran] = useState(false);
@@ -82,7 +84,7 @@ export default function EcranCarteMembre() {
   });
 
   return (
-    <View style={styles.conteneurGlobal}>
+    <SafeAreaView style={styles.conteneurGlobal}>
       <Animated.View style={[StyleSheet.absoluteFill, transitionPleinEcran, { pointerEvents: estPleinEcran ? 'auto' : 'none' }]}>
         {estPleinEcran && (
            <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
@@ -141,7 +143,7 @@ export default function EcranCarteMembre() {
           </TouchableOpacity>
         )}
       </Animated.View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -152,7 +154,6 @@ const styles = StyleSheet.create({
   },
   contenu: {
     flex: 1,
-    paddingTop: 60,
     paddingHorizontal: 20,
     alignItems: 'center',
   },

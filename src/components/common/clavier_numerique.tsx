@@ -61,23 +61,22 @@ export const ClavierNumerique = ({ surTouche, surEffacer, surValider, afficherVa
 const styles = StyleSheet.create({
   conteneur: {
     width: '100%',
-    maxWidth: 340,
+    maxWidth: 280,
     alignSelf: 'center',
-    paddingVertical: 20,
+    paddingVertical: 10,
   },
   ligne: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   toucheChiffre: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    backgroundColor: couleurs.carteArrierePlan, // Navy Medium
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: couleurs.carteArrierePlan,
     justifyContent: 'center',
     alignItems: 'center',
-    // Ombre premium (glow subtle)
     shadowColor: couleurs.primaireFonce,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
@@ -85,18 +84,18 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   texteChiffre: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '500',
     color: couleurs.textePrincipal,
   },
   toucheAction: {
-    width: 76,
-    height: 76,
+    width: 64,
+    height: 64,
     justifyContent: 'center',
     alignItems: 'center',
   },
   toucheVide: {
-    width: 76,
-    height: 76,
+    width: 64,
+    height: 64,
   }
 });

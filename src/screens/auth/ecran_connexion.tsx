@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { Ionicons } from '@expo/vector-icons';
 import { couleurs } from '../../theme/couleurs';
@@ -125,7 +126,7 @@ export default function EcranConnexion() {
   });
 
   return (
-    <View style={styles.conteneur}>
+    <SafeAreaView style={styles.conteneur}>
       <View style={styles.entete}>
         <View style={styles.iconeProfil}>
           <Ionicons name="person" size={40} color={couleurs.primaireFonce} />
@@ -172,7 +173,7 @@ export default function EcranConnexion() {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -180,7 +181,6 @@ const styles = StyleSheet.create({
   conteneur: {
     flex: 1,
     backgroundColor: couleurs.arrierePlan,
-    paddingTop: 40,
     justifyContent: 'space-between',
   },
   entete: {
@@ -218,15 +218,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 30,
+    marginVertical: 20,
   },
   point: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     borderWidth: 2,
     borderColor: couleurs.bordure,
-    marginHorizontal: 12,
+    marginHorizontal: 10,
   },
   pointRempli: {
     backgroundColor: couleurs.primaire,
@@ -238,11 +238,11 @@ const styles = StyleSheet.create({
   },
   conteneurBas: {
     flex: 1,
-    justifyContent: 'flex-end',
-    paddingBottom: 40,
+    justifyContent: 'center',
+    paddingBottom: 20,
   },
   conteneurClavier: {
-    marginBottom: 20,
+    marginBottom: 10,
   },
   actionsSecondaires: {
     alignItems: 'center',

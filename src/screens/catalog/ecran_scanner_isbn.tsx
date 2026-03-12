@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { 
@@ -18,8 +19,9 @@ import { Alert } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
-export default function EcranScannerISBN() {
+export default function EcranScannerISBN({ route }: any) {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const laserY = useSharedValue(0);
   const [permission, requestPermission] = useCameraPermissions();
   const { rechercherParISBN } = utiliserMagasinCatalogue();
@@ -42,16 +44,31 @@ export default function EcranScannerISBN() {
 
   if (!permission.granted) {
     return (
-      <View style={styles.conteneur}>
-        <Text style={styles.texteInformation}>Caméra requise pour scanner.</Text>
+      <SafeAreaView style={[styles.conteneur, styles.conteneurCentre]}>
+        <Ionicons name="camera-outline" size={80} color={couleurs.primaire} style={{ marginBottom: 20 }} />
+        <Text style={styles.texteInformation}>
+          BookFlow Card a besoin de votre autorisation pour utiliser la caméra afin de scanner les QR codes.
+        </Text>
         <TouchableOpacity style={styles.boutonPermission} onPress={requestPermission}>
-          <Text style={styles.texteBouton}>Autoriser</Text>
+          <Text style={styles.texteBouton}>Autoriser la Caméra</Text>
         </TouchableOpacity>
-      </View>
+        <TouchableOpacity style={{ marginTop: 20 }} onPress={() => navigation.goBack()}>
+          <Text style={styles.texteLienGris}>Plus tard</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     );
   }
 
   const gererScan = (data: string) => {
+    const mode = route.params?.mode;
+    const estModeInscription = mode === 'INSCRIPTION';
+
+    if (estModeInscription) {
+      // Pour l'inscription, on renvoie simplement la data à l'écran précédent
+      (navigation as any).navigate('Activation', { qrData: data });
+      return;
+    }
+
     // 1. Tenter une synchronisation (QR JSON)
     const resultatSync = serviceSynchroQR.traiterScan(data);
     
@@ -98,7 +115,7 @@ export default function EcranScannerISBN() {
       
       <View style={styles.overlay}>
         <TouchableOpacity 
-          style={styles.boutonFermer} 
+          style={[styles.boutonFermer, { top: Math.max(insets.top, 20) }]} 
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="close" size={30} color="white" />
@@ -115,7 +132,7 @@ export default function EcranScannerISBN() {
            </View>
         </View>
 
-        <Text style={styles.instruction}>Placez l'ISBN dans le cadre</Text>
+        <Text style={styles.instruction}>Placez le QR Code dans le cadre</Text>
       </View>
     </View>
   );
@@ -126,6 +143,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black',
   },
+  conteneurCentre: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'transparent',
@@ -134,11 +156,16 @@ const styles = StyleSheet.create({
   },
   boutonFermer: {
     position: 'absolute',
-    top: 50,
-    right: 20,
+    left: 20,
     padding: 10,
     backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 25,
+    zIndex: 20,
+  },
+  texteLienGris: {
+    color: couleurs.texteSecondaire,
+    fontSize: 14,
+    textDecorationLine: 'underline',
   },
   viseurConteneur: {
     width: 250,

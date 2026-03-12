@@ -1,15 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { couleurs } from '../../theme/couleurs';
 import { Bouton } from '../../components/common/bouton';
 
 export default function EcranBienvenue({ navigation }: any) {
   return (
-    <View style={styles.conteneur}>
+    <SafeAreaView style={styles.conteneur}>
       <View style={styles.entete}>
-        <Text style={styles.titre}>BiblioCard</Text>
+        <Text style={styles.titre}>BookFlow Card</Text>
         <Text style={styles.sousTitre}>
-          Votre bibliothèque numérique, sécurisée et hors ligne.
+          Votre carte de bibliothèque numérique, sécurisée.
         </Text>
       </View>
       
@@ -24,7 +25,7 @@ export default function EcranBienvenue({ navigation }: any) {
           type="secondaire" 
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
