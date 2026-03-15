@@ -1,38 +1,44 @@
 /**
  * Palette de Couleurs BiblioCard
- * Teal Premium × Navy Marine
  */
 
-export const couleurs = {
-  // Fond principal de l'application (Navy Deep)
+export const paletteSombre = {
   arrierePlan: '#0F172A',
-  
-  // Fond pour les cartes et éléments surélevés (Navy Card)
   carteArrierePlan: '#1E293B',
-
-  // Couleur primaire (Teal)
-  primaire: '#0D9488', // Teal 600
-  primaireClair: '#14B8A6', // Teal 500 (Hover/Press)
-  primaireFonce: '#0F766E', // Teal 700
-  
-  // Accents dorés pour éléments premium/succès
-  accentDoré: '#F59E0B', // Amber 500
-  accentDoréClair: '#FCD34D', // Amber 300
-  
-  // Textes
-  textePrincipal: '#FFFFFF', // Texte sur fond sombre
-  texteSecondaire: '#94A3B8', // Slate 400 (Sous-titres, placeholders)
-  
-  // États de validation
-  succes: '#10B981', // Emerald 500
-  erreur: '#EF4444', // Red 500
-  attention: '#F59E0B', // Amber 500
-  
-  // Divers
-  bordure: '#334155', // Slate 700
+  primaire: '#0D9488',
+  primaireClair: '#14B8A6',
+  primaireFonce: '#0F766E',
+  accentDoré: '#F59E0B',
+  accentDoréClair: '#FCD34D',
+  textePrincipal: '#FFFFFF',
+  texteSecondaire: '#94A3B8',
+  succes: '#10B981',
+  erreur: '#EF4444',
+  attention: '#F59E0B',
+  bordure: '#334155',
   transparent: 'transparent',
-  
-  // Dégradés (utiliser avec expo-linear-gradient)
-  degradePrincipal: ['#0D9488', '#0F766E'], // Teal Gradient
-  degradeCarte: ['#1E293B', '#0F172A'], // Navy Gradient
+  degradePrincipal: ['#0D9488', '#0F766E'],
+  degradeCarte: ['#1E293B', '#0F172A'],
 };
+
+export const paletteClair = {
+  arrierePlan: '#F8FAFC',
+  carteArrierePlan: '#FFFFFF',
+  primaire: '#0D9488',
+  primaireClair: '#0F766E',
+  primaireFonce: '#134E4A',
+  accentDoré: '#D97706',
+  accentDoréClair: '#F59E0B',
+  textePrincipal: '#1E293B',
+  texteSecondaire: '#64748B',
+  succes: '#059669',
+  erreur: '#DC2626',
+  attention: '#D97706',
+  bordure: '#E2E8F0',
+  transparent: 'transparent',
+  degradePrincipal: ['#14B8A6', '#0D9488'],
+  degradeCarte: ['#FFFFFF', '#F1F5F9'],
+};
+
+// Par défaut, on garde l'objet pour la compatibilité immédiate (sera remplacé par le hook)
+export const couleurs = paletteSombre;

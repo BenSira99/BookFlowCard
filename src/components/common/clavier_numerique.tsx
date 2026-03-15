@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { couleurs } from '../../theme/couleurs';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 
 interface ProprietesClavier {
   surTouche: (chiffre: string) => void;
@@ -11,6 +11,9 @@ interface ProprietesClavier {
 }
 
 export const ClavierNumerique = ({ surTouche, surEffacer, surValider, afficherValider = false }: ProprietesClavier) => {
+  const { couleurs, fs } = useDesignSystem();
+  const styles = creerStyles(couleurs, fs);
+
   const touches = [
     ['1', '2', '3'],
     ['4', '5', '6'],
@@ -58,7 +61,7 @@ export const ClavierNumerique = ({ surTouche, surEffacer, surValider, afficherVa
   );
 };
 
-const styles = StyleSheet.create({
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   conteneur: {
     width: '100%',
     maxWidth: 280,
@@ -84,7 +87,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   texteChiffre: {
-    fontSize: 24,
+    fontSize: fs(24),
     fontWeight: '500',
     color: couleurs.textePrincipal,
   },

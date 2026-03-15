@@ -65,4 +65,5 @@ yarn-error.*
 # generated native folders
 /ios
 /android
-/App_desktop_bookflowmanager
+App_desktop_bookflowmanager/
+BookFlow Manager/

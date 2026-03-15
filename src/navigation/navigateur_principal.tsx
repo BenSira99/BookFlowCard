@@ -1,7 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { couleurs } from '../theme/couleurs';
 
 import EcranAccueil from '../screens/app/ecran_accueil';
 import EcranCarteMembre from '../screens/card/ecran_carte_membre';
@@ -13,11 +12,16 @@ import EcranResumeImportation from '../screens/share/ecran_resume_importation';
 import EcranResumeTransactions from '../screens/share/ecran_resume_transactions';
 import { IconeClocheAnimee } from '../components/notifications/icone_cloche_animee';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useDesignSystem } from '../hooks/useDesignSystem';
 
 const Onglets = createBottomTabNavigator();
 const StackPrincipal = createStackNavigator();
 
 function NavigateurOnglets() {
+  const insets = useSafeAreaInsets();
+  const { couleurs } = useDesignSystem();
+
   return (
     <Onglets.Navigator
       screenOptions={({ route }) => ({
@@ -25,9 +29,9 @@ function NavigateurOnglets() {
         tabBarStyle: {
           backgroundColor: couleurs.carteArrierePlan,
           borderTopColor: couleurs.bordure,
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 60,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 10,
+          paddingTop: 10,
+          height: 60 + (insets.bottom > 0 ? insets.bottom : 0),
         },
         tabBarActiveTintColor: couleurs.primaire,
         tabBarInactiveTintColor: couleurs.texteSecondaire,

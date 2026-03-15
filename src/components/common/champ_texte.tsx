@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { couleurs } from '../../theme/couleurs';
-import Animated, { useAnimatedStyle, withTiming, interpolateColor } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 
 interface ProprietesChampTexte {
   label: string;
@@ -23,6 +23,9 @@ export const ChampTexte = ({
   icone,
   placeholder,
 }: ProprietesChampTexte) => {
+  const { couleurs, fs } = useDesignSystem();
+  const styles = creerStyles(couleurs, fs);
+
   const [estFocus, setEstFocus] = useState(false);
   const [afficherMotDePasse, setAfficherMotDePasse] = useState(!estMotDePasse);
 
@@ -38,7 +41,7 @@ export const ChampTexte = ({
     return {
       borderColor: withTiming(couleurBordure, { duration: 250 }),
     };
-  }, [estFocus, erreur]);
+  }, [estFocus, erreur, couleurs]);
 
   return (
     <View style={styles.conteneurGlobal}>
@@ -88,13 +91,13 @@ export const ChampTexte = ({
   );
 };
 
-const styles = StyleSheet.create({
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   conteneurGlobal: {
     marginBottom: 20,
     width: '100%',
   },
   label: {
-    fontSize: 14,
+    fontSize: fs(14),
     color: couleurs.textePrincipal,
     marginBottom: 8,
     fontWeight: '500',
@@ -105,9 +108,9 @@ const styles = StyleSheet.create({
   conteneurInput: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: couleurs.carteArrierePlan, // Navy Card
+    backgroundColor: couleurs.carteArrierePlan,
     borderWidth: 1.5,
-    borderRadius: 12, // Coins premium
+    borderRadius: 12,
     minHeight: 56,
   },
   iconeGauche: {
@@ -120,14 +123,13 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: couleurs.textePrincipal,
-    fontSize: 16,
+    fontSize: fs(16),
     paddingVertical: 14,
-    // S'il n'y a pas d'icône à gauche, on met un padding
     paddingLeft: 16, 
   },
   texteErreur: {
     color: couleurs.erreur,
-    fontSize: 12,
+    fontSize: fs(12),
     marginTop: 6,
   },
 });

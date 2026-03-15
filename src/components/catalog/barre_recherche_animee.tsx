@@ -7,9 +7,8 @@ import Animated, {
   withTiming, 
   withSpring,
   interpolateColor,
-  useDerivedValue
 } from 'react-native-reanimated';
-import { couleurs } from '../../theme/couleurs';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 
 interface ProprietesBarreRecherche {
   valeur: string;
@@ -18,6 +17,9 @@ interface ProprietesBarreRecherche {
 }
 
 export const BarreRechercheAnimee = ({ valeur, onChange, onScanPress }: ProprietesBarreRecherche) => {
+  const { couleurs, fs } = useDesignSystem();
+  const styles = creerStyles(couleurs, fs);
+  
   const estFocus = useSharedValue(0);
   const inputRef = useRef<TextInput>(null);
 
@@ -25,7 +27,7 @@ export const BarreRechercheAnimee = ({ valeur, onChange, onScanPress }: Propriet
     const borderColor = interpolateColor(
       estFocus.value,
       [0, 1],
-      ['rgba(255, 255, 255, 0.05)', couleurs.primaire]
+      [couleurs.bordure, couleurs.primaire]
     );
     const scale = withSpring(estFocus.value ? 1.02 : 1);
     
@@ -77,7 +79,7 @@ export const BarreRechercheAnimee = ({ valeur, onChange, onScanPress }: Propriet
   );
 };
 
-const styles = StyleSheet.create({
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   wrapper: {
     width: '100%',
     paddingVertical: 10,
@@ -109,8 +111,8 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: 'white',
-    fontSize: 15,
+    color: couleurs.textePrincipal,
+    fontSize: fs(15),
     fontWeight: '500',
   },
   boutonScanner: {

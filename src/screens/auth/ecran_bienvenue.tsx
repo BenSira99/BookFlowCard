@@ -1,10 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { couleurs } from '../../theme/couleurs';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 import { Bouton } from '../../components/common/bouton';
 
 export default function EcranBienvenue({ navigation }: any) {
+  const { couleurs, fs } = useDesignSystem();
+  const styles = creerStyles(couleurs, fs);
+
   return (
     <SafeAreaView style={styles.conteneur}>
       <View style={styles.entete}>
@@ -29,7 +32,7 @@ export default function EcranBienvenue({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   conteneur: {
     flex: 1,
     justifyContent: 'space-between',
@@ -46,13 +49,13 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   titre: {
-    fontSize: 42,
+    fontSize: fs(42),
     fontWeight: 'bold',
     color: couleurs.primaire,
     marginBottom: 10,
   },
   sousTitre: {
-    fontSize: 16,
+    fontSize: fs(16),
     color: couleurs.texteSecondaire,
     textAlign: 'center',
     paddingHorizontal: 20,

@@ -3,7 +3,7 @@
 ## 📋 Description
 Application mobile React Native **Premium** pour la gestion des adhérents d'une bibliothèque. Conçue avec une expérience utilisateur fluide, des animations de pointe et une sécurité rigoureuse, elle transforme la carte de bibliothèque physique en un compagnon numérique intelligent.
 
-## 🚀 Fonctionnalités (Modules 1 à 10)
+## 🚀 Fonctionnalités
 - **M1 : Authentification Sécurisée** — Écran de bienvenue animé, login PIN/Biométrie, et verrouillage automatique.
 - **M2 : Support Biométrique** — Intégration FaceID / TouchID avec fallback PIN.
 - **M3 : Tableau de bord Interactif** — Statistiques vivantes, progression XP utilisateur ("Barre Liquide") et accès rapide.
@@ -45,10 +45,14 @@ EXPO_PUBLIC_SECURE_KEY=votre_cle_de_chiffrement
 npx expo start
 ```
 
-## 🧪 Qualité du Code
+## 🧪 Tests
 - **Linting** : ESLint + Prettier
 - **Type Checking** : TypeScript `noEmit` (0 erreur)
+- **Unit Tests** : (À venir) Jest + React Native Testing Library
 - **Security Audit** : Orienté OWASP Mobile Top 10
+
+## 🐳 Docker
+(À venir) Dockerfile pour le packaging et la CI/CD.
 
 ## 📁 Structure du Projet
 - `src/screens/` : Écrans organisés par modules (auth, app, catalog, info, settings).
@@ -56,6 +60,7 @@ npx expo start
 - `src/store/` : Logique métier et persistence des données.
 - `src/navigation/` : Architecture de navigation imbriquée.
 - `src/theme/` : Design system centralisé (couleurs Teal/Navy).
+- `src/services/` : Services de synchronisation, sécurité et notifications.
 
 ## 🔒 Sécurité
 - **CWE-620/308** : Validation stricte des changements de PIN.
@@ -63,8 +68,8 @@ npx expo start
 - **Stockage** : Utilisation de `AES-256` via SecureStore pour les secrets.
 
 ## 📄 Licence
-MIT — Développé par BenSira99
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
-## 👤 Auteur
+## 👤 Auteur — BenSira99
 **Ben Sira** — Senior Full-Stack Engineer
 [GitHub](https://github.com/BenSira99) | [Email](mailto:ligbandrohbensira@gmail.com)

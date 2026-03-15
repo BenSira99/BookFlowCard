@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,19 +11,17 @@ import Animated, {
   runOnJS 
 } from 'react-native-reanimated';
 
-import { couleurs } from '../../theme/couleurs';
 import { utiliserMagasinParametres } from '../../store/magasin_parametres';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 
 // Composants
 import { InterrupteurPremium } from '../../components/settings/interrupteur_premium';
 import { SeparateurAnime } from '../../components/settings/separateur_anime';
-import { JaugeNettoyageCache } from '../../components/settings/jauge_nettoyage_cache';
 import { ModalDeconnexion } from '../../components/settings/modal_deconnexion';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-
-const OptionReglage = ({ icone, titre, sousTitre, type = 'chevron', valeur, onPress }: any) => {
+const OptionReglage = ({ icone, titre, sousTitre, type = 'chevron', valeur, onPress, styles, couleurs }: any) => {
   return (
     <TouchableOpacity style={styles.option} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.iconeFond, { backgroundColor: couleurs.carteArrierePlan }]}>
@@ -45,25 +43,13 @@ export default function EcranParametres() {
   const { 
     estModeSombre, setModeSombre, 
     estBiometrieActive, setBiometrie,
-    notifications, setNotification,
-    poidsCache, viderCache
+    taillePolice, setTaillePolice
   } = utiliserMagasinParametres();
 
-  const [nettoyageEnCours, setNettoyageEnCours] = React.useState(false);
-  const [nettoyageTermine, setNettoyageTermine] = React.useState(false);
-  const [modalDeconnexionVisible, setModalDeconnexionVisible] = React.useState(false);
+  const { couleurs, fs } = useDesignSystem();
+  const styles = creerStyles(couleurs, fs);
 
-  const gererNettoyage = async () => {
-    setNettoyageEnCours(true);
-    setNettoyageTermine(false);
-    await viderCache();
-    setNettoyageEnCours(false);
-    setNettoyageTermine(true);
-    
-    setTimeout(() => {
-        setNettoyageTermine(false);
-    }, 3000);
-  };
+  const [modalDeconnexionVisible, setModalDeconnexionVisible] = React.useState(false);
 
   // Animation thème
   const scaleTheme = useSharedValue(0);
@@ -80,9 +66,21 @@ export default function EcranParametres() {
     });
   };
 
+  const changerTaillePolice = () => {
+    let nouvelleTaille = taillePolice + 1;
+    if (nouvelleTaille > 3) nouvelleTaille = 1;
+    setTaillePolice(nouvelleTaille);
+  };
+
+  const libelleTaillePolice = {
+    1: 'Petit',
+    2: 'Normal',
+    3: 'Grand'
+  }[taillePolice];
+
   const styleMasque = useAnimatedStyle(() => ({
-    transform: [{ scale: scaleTheme.value * 3 }], // Expand pour couvrir tout
-    backgroundColor: themeTemp ? couleurs.arrierePlan : '#F7FAFC', // Mock light theme
+    transform: [{ scale: scaleTheme.value * 4 }], 
+    backgroundColor: themeTemp ? '#0F172A' : '#F8FAFC', 
     opacity: scaleTheme.value,
   }));
 
@@ -90,7 +88,7 @@ export default function EcranParametres() {
     <View style={[styles.conteneur, { paddingTop: insets.top }]}>
       <View style={styles.entete}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.boutonRetour}>
-          <Ionicons name="arrow-back" size={24} color="white" />
+          <Ionicons name="arrow-back" size={24} color={couleurs.textePrincipal} />
         </TouchableOpacity>
         <Text style={styles.titreEntete}>Paramètres</Text>
       </View>
@@ -103,6 +101,8 @@ export default function EcranParametres() {
             titre="Changer le code PIN" 
             sousTitre="Renforcez la sécurité de votre accès"
             onPress={() => (navigation as any).navigate('ChangementPin')}
+            styles={styles}
+            couleurs={couleurs}
           />
           <OptionReglage 
             icone="finger-print-outline" 
@@ -111,6 +111,8 @@ export default function EcranParametres() {
             type="switch"
             valeur={estBiometrieActive}
             onPress={() => setBiometrie(!estBiometrieActive)}
+            styles={styles}
+            couleurs={couleurs}
           />
         </Animated.View>
 
@@ -124,45 +126,23 @@ export default function EcranParametres() {
             type="switch"
             valeur={estModeSombre}
             onPress={basculerTheme}
+            styles={styles}
+            couleurs={couleurs}
           />
           <OptionReglage 
             icone="text-outline" 
             titre="Taille de la police" 
-            sousTitre="Normal"
-          />
-        </Animated.View>
-
-        <SeparateurAnime />
-
-        <Animated.View entering={FadeInDown.delay(300)}>
-          <Text style={styles.titreSection}>Notifications</Text>
-          <OptionReglage 
-            icone="notifications-outline" 
-            titre="Alertes Emprunts" 
-            type="switch"
-            valeur={notifications.emprunts}
-            onPress={() => setNotification('emprunts', !notifications.emprunts)}
-          />
-          <OptionReglage 
-            icone="book-outline" 
-            titre="Actualités" 
-            type="switch"
-            valeur={notifications.actualites}
-            onPress={() => setNotification('actualites', !notifications.actualites)}
+            sousTitre={libelleTaillePolice}
+            onPress={changerTaillePolice}
+            styles={styles}
+            couleurs={couleurs}
           />
         </Animated.View>
 
         <SeparateurAnime />
 
         <Animated.View entering={FadeInDown.delay(400)}>
-          <Text style={styles.titreSection}>Maintenance</Text>
-          <OptionReglage 
-            icone="trash-outline" 
-            titre="Vider le cache" 
-            sousTitre={poidsCache}
-            onPress={gererNettoyage}
-          />
-          <JaugeNettoyageCache enCours={nettoyageEnCours} termine={nettoyageTermine} />
+          <Text style={styles.titreSection}>Session</Text>
           <TouchableOpacity style={styles.boutonDeconnexion} onPress={() => setModalDeconnexionVisible(true)}>
             <Ionicons name="log-out-outline" size={20} color={couleurs.erreur} />
             <Text style={styles.texteDeconnexion}>Déconnexion</Text>
@@ -185,14 +165,14 @@ export default function EcranParametres() {
         onClose={() => setModalDeconnexionVisible(false)}
         onConfirm={() => {
             setModalDeconnexionVisible(false);
-            navigation.navigate('Login' as any);
+            navigation.replace('Login' as any);
         }}
       />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   conteneur: {
     flex: 1,
     backgroundColor: couleurs.arrierePlan,
@@ -208,15 +188,15 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   titreEntete: {
-    fontSize: 20,
+    fontSize: fs(20),
     fontWeight: 'bold',
-    color: 'white',
+    color: couleurs.textePrincipal,
   },
   scrollContent: {
     padding: 20,
   },
   titreSection: {
-    fontSize: 14,
+    fontSize: fs(14),
     fontWeight: 'bold',
     color: couleurs.primaire,
     textTransform: 'uppercase',
@@ -237,19 +217,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 15,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: couleurs.bordure,
   },
   texteOption: {
     flex: 1,
   },
   titreOption: {
-    fontSize: 16,
+    fontSize: fs(16),
     fontWeight: '600',
-    color: 'white',
+    color: couleurs.textePrincipal,
     marginBottom: 2,
   },
   sousTitreOption: {
-    fontSize: 13,
+    fontSize: fs(13),
     color: couleurs.texteSecondaire,
   },
   boutonDeconnexion: {
@@ -266,7 +246,7 @@ const styles = StyleSheet.create({
   texteDeconnexion: {
     color: couleurs.erreur,
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: fs(15),
   },
   piedPage: {
     marginTop: 40,
@@ -274,21 +254,22 @@ const styles = StyleSheet.create({
   },
   texteVersion: {
     color: couleurs.texteSecondaire,
-    fontSize: 12,
+    fontSize: fs(12),
     fontWeight: '600',
   },
   texteAuteur: {
-    color: 'rgba(255,255,255,0.15)',
-    fontSize: 10,
+    color: couleurs.texteSecondaire,
+    opacity: 0.3,
+    fontSize: fs(10),
     marginTop: 4,
   },
   masqueTheme: {
     position: 'absolute',
-    top: 250, // Proche du switch thème
+    top: 250, 
     right: 20,
-    width: SCREEN_WIDTH * 1.5,
-    height: SCREEN_WIDTH * 1.5,
-    borderRadius: (SCREEN_WIDTH * 1.5) / 2,
+    width: SCREEN_WIDTH * 2,
+    height: SCREEN_WIDTH * 2,
+    borderRadius: SCREEN_WIDTH,
     zIndex: 100,
   }
 });

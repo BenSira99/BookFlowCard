@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { couleurs } from '../../theme/couleurs';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 import { Bouton } from '../../components/common/bouton';
 import { serviceSynchroQR } from '../../services/service_synchro_qr';
 import { utiliserMagasinAuth } from '../../store/magasin_auth';
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, TouchableOpacity } from 'react-native';
 
 export default function EcranActivation({ navigation, route }: any) {
   const [donneesScannees, setDonneesScannees] = useState<any>(null);
   const [chargement, setChargement] = useState(false);
   const { importerUtilisateur } = utiliserMagasinAuth();
+  const { couleurs, fs } = useDesignSystem();
+  const styles = creerStyles(couleurs, fs);
 
   // Gestion du retour du scanner
   useEffect(() => {
@@ -34,7 +35,6 @@ export default function EcranActivation({ navigation, route }: any) {
 
     setChargement(true);
     try {
-      // Normalisation et import (Logique extraite de serviceSynchroQR.traiterInscriptionDesktop)
       const data = donneesScannees;
       if (data.qr_code || data.infoSpecifique) {
         importerUtilisateur({
@@ -47,7 +47,6 @@ export default function EcranActivation({ navigation, route }: any) {
           secretQR: data.qr_code || data.infoSpecifique
         });
         
-        // Petit délai pour l'effet visuel
         setTimeout(() => {
           setChargement(false);
           navigation.navigate('CreationCode');
@@ -79,7 +78,7 @@ export default function EcranActivation({ navigation, route }: any) {
               activeOpacity={0.8}
             >
               <View style={styles.cercleIcone}>
-                <Ionicons name="qr-code" size={60} color={couleurs.primaire} />
+                <Ionicons name="qr-code" size={fs(60)} color={couleurs.primaire} />
               </View>
               <Text style={styles.texteBoutonPrincipal}>Scanner le QR d'inscription</Text>
             </TouchableOpacity>
@@ -91,7 +90,7 @@ export default function EcranActivation({ navigation, route }: any) {
                    {donneesScannees.photo_profil ? (
                      <Image source={{ uri: donneesScannees.photo_profil }} style={styles.avatar} />
                    ) : (
-                     <Ionicons name="person" size={40} color={couleurs.texteSecondaire} />
+                     <Ionicons name="person" size={fs(40)} color={couleurs.texteSecondaire} />
                    )}
                 </View>
                 <View style={styles.colonnesTexte}>
@@ -135,7 +134,7 @@ export default function EcranActivation({ navigation, route }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   conteneur: {
     flex: 1, 
     backgroundColor: couleurs.arrierePlan 
@@ -148,15 +147,15 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   titre: {
-    fontSize: 32,
+    fontSize: fs(32),
     fontWeight: 'bold',
     color: couleurs.primaire,
     marginBottom: 12,
   },
   texte: {
     color: couleurs.texteSecondaire,
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: fs(16),
+    lineHeight: fs(24),
   },
   conteneurActionInitiale: {
     flex: 1,
@@ -166,46 +165,51 @@ const styles = StyleSheet.create({
   },
   boutonScanPrincipal: {
     alignItems: 'center',
-    gap: 20,
   },
   cercleIcone: {
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: 'rgba(13, 148, 136, 0.1)',
+    backgroundColor: couleurs.estModeSombre ? 'rgba(13, 148, 136, 0.15)' : 'rgba(13, 148, 136, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
     borderColor: couleurs.primaire,
     borderStyle: 'dashed',
+    marginBottom: 20,
   },
   texteBoutonPrincipal: {
-    color: 'white',
-    fontSize: 18,
+    color: couleurs.textePrincipal,
+    fontSize: fs(18),
     fontWeight: '600',
     textAlign: 'center',
   },
   carteRecapitulatif: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: couleurs.carteArrierePlan,
     borderRadius: 24,
     padding: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: couleurs.bordure,
+    shadowColor: couleurs.primaire,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   ligneInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
     marginBottom: 20,
   },
   avatarPlaceholder: {
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: couleurs.estModeSombre ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
+    marginRight: 16,
   },
   avatar: {
     width: '100%',
@@ -216,29 +220,30 @@ const styles = StyleSheet.create({
   },
   label: {
     color: couleurs.texteSecondaire,
-    fontSize: 13,
+    fontSize: fs(13),
     marginBottom: 4,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   valeur: {
-    color: 'white',
-    fontSize: 20,
+    color: couleurs.textePrincipal,
+    fontSize: fs(20),
     fontWeight: 'bold',
   },
   separateur: {
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: couleurs.bordure,
     marginVertical: 20,
   },
   grilleInfos: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 24,
     marginBottom: 30,
   },
   itemInfo: {
     minWidth: '40%',
+    marginRight: 20,
+    marginBottom: 10,
   },
   boutonValider: {
     marginTop: 10,
@@ -250,7 +255,7 @@ const styles = StyleSheet.create({
   },
   texteReessayer: {
     color: couleurs.texteSecondaire,
-    fontSize: 14,
+    fontSize: fs(14),
     textDecorationLine: 'underline',
   }
 });

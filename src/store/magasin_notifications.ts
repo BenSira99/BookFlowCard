@@ -27,7 +27,7 @@ export const utiliserMagasinNotifications = create<EtatNotifications>((set, get)
   notifications: [
     {
       id: '1',
-      titre: 'Bienvenue sur BiblioCard',
+      titre: 'Bienvenue sur BookFlow Card',
       message: 'Explorez votre nouvelle bibliothèque numérique et gérez vos emprunts facilement.',
       date: new Date().toISOString(),
       estLu: false,

@@ -29,11 +29,11 @@ export default function EcranChangementPin() {
   const gererClavier = (chiffre: string) => {
     setErreur('');
     if (etape === 1) {
-      if (ancienPin.length < 4) setAncienPin(prev => prev + chiffre);
+      if (ancienPin.length < 6) setAncienPin(prev => prev + chiffre);
     } else if (etape === 2) {
-      if (nouveauPin.length < 4) setNouveauPin(prev => prev + chiffre);
+      if (nouveauPin.length < 6) setNouveauPin(prev => prev + chiffre);
     } else {
-      if (confirmationPin.length < 4) setConfirmationPin(prev => prev + chiffre);
+      if (confirmationPin.length < 6) setConfirmationPin(prev => prev + chiffre);
     }
   };
 
@@ -44,12 +44,12 @@ export default function EcranChangementPin() {
   };
 
   useEffect(() => {
-    if (etape === 1 && ancienPin.length === 4) {
+    if (etape === 1 && ancienPin.length === 6) {
       // Valide l'étape 1
       setEtape(2);
-    } else if (etape === 2 && nouveauPin.length === 4) {
+    } else if (etape === 2 && nouveauPin.length === 6) {
       setEtape(3);
-    } else if (etape === 3 && confirmationPin.length === 4) {
+    } else if (etape === 3 && confirmationPin.length === 6) {
       validerChangement();
     }
   }, [ancienPin, nouveauPin, confirmationPin]);
@@ -73,7 +73,7 @@ export default function EcranChangementPin() {
 
   const PointsCode = ({ code }: { code: string }) => (
     <View style={styles.conteneurPoints}>
-      {[1, 2, 3, 4].map((i) => (
+      {[1, 2, 3, 4, 5, 6].map((i) => (
         <View 
           key={i} 
           style={[styles.point, code.length >= i && styles.pointRempli, !!erreur && styles.pointErreur]} 
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    paddingBottom: 40,
+    paddingBottom: 100,
     gap: 15,
   },
   touche: {

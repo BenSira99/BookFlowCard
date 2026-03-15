@@ -8,6 +8,7 @@ import Animated, {
   Extrapolate
 } from 'react-native-reanimated';
 import { Categorie } from '../../store/magasin_catalogue';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 
 interface ProprietesCarrousel {
   categories: Categorie[];
@@ -15,7 +16,7 @@ interface ProprietesCarrousel {
   selectionneeId: string | null;
 }
 
-const ItemCategorie = ({ categorie, scrollX, index, select, estSelectionnee }: any) => {
+const ItemCategorie = ({ categorie, scrollX, index, select, estSelectionnee, couleurs, fs }: any) => {
   const styleImage = useAnimatedStyle(() => {
     const translateX = interpolate(
       scrollX.value,
@@ -25,6 +26,8 @@ const ItemCategorie = ({ categorie, scrollX, index, select, estSelectionnee }: a
     );
     return { transform: [{ translateX }] };
   });
+
+  const styles = creerStyles(couleurs, fs);
 
   return (
     <TouchableOpacity 
@@ -47,6 +50,8 @@ const ItemCategorie = ({ categorie, scrollX, index, select, estSelectionnee }: a
 };
 
 export const CarrouselCategories = ({ categories, onSelect, selectionneeId }: ProprietesCarrousel) => {
+  const { couleurs, fs } = useDesignSystem();
+  const styles = creerStyles(couleurs, fs);
   const scrollX = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler((event) => {
@@ -72,6 +77,8 @@ export const CarrouselCategories = ({ categories, onSelect, selectionneeId }: Pr
             scrollX={scrollX} 
             select={onSelect}
             estSelectionnee={selectionneeId === cat.id}
+            couleurs={couleurs}
+            fs={fs}
           />
         ))}
       </Animated.ScrollView>
@@ -79,7 +86,7 @@ export const CarrouselCategories = ({ categories, onSelect, selectionneeId }: Pr
   );
 };
 
-const styles = StyleSheet.create({
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   conteneur: {
     marginVertical: 15,
   },
@@ -92,11 +99,13 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: '#333',
+    backgroundColor: couleurs.carteArrierePlan,
+    borderWidth: 1,
+    borderColor: couleurs.bordure,
   },
   carteSelectionnee: {
     borderWidth: 2,
-    borderColor: '#0d9488',
+    borderColor: couleurs.primaire,
   },
   imageConteneur: {
     flex: 1,
@@ -113,7 +122,7 @@ const styles = StyleSheet.create({
   },
   nomCategorie: {
     color: 'white',
-    fontSize: 12,
+    fontSize: fs(12),
     fontWeight: 'bold',
     textAlign: 'center',
     paddingHorizontal: 5,

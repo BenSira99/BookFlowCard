@@ -9,21 +9,21 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 
-import { couleurs } from '../../theme/couleurs';
 import { utiliserMagasinInfosBiblio } from '../../store/magasin_infos_biblio';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 
 // Composants
 import { HorairesOuverture } from '../../components/info/horaires_ouverture';
-import { CarteEvenement } from '../../components/info/carte_evenement';
-import { CarrouselActualites } from '../../components/info/carrousel_actualites';
 import { FaqAccordeon } from '../../components/info/faq_accordeon';
-import { FormulaireContact } from '../../components/info/formulaire_contact';
 
 export default function EcranInfosBibliotheque() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { adresse, telephone, email, evenements, actualites, faq } = utiliserMagasinInfosBiblio();
+  const { adresse, telephone, email, faq } = utiliserMagasinInfosBiblio();
   
+  const { couleurs, fs } = useDesignSystem();
+  const styles = creerStyles(couleurs, fs);
+
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollY.value = event.contentOffset.y;
@@ -56,8 +56,6 @@ export default function EcranInfosBibliotheque() {
           <HorairesOuverture />
         </Animated.View>
 
-        <CarrouselActualites actualites={actualites} />
-
         <View style={styles.sectionInfo}>
           <TouchableOpacity style={styles.carteInfo} onPress={ouvrirGPS} activeOpacity={0.7}>
             <View style={styles.iconeCercle}>
@@ -70,32 +68,18 @@ export default function EcranInfosBibliotheque() {
           </TouchableOpacity>
 
           <View style={styles.ligneContact}>
-             <TouchableOpacity style={[styles.carteInfo, { flex: 1 }]} onPress={() => Linking.openURL(`tel:${telephone}`)}>
+             <TouchableOpacity style={styles.carteInfo} onPress={() => Linking.openURL(`tel:${telephone}`)}>
                 <Ionicons name="call" size={20} color={couleurs.primaire} />
                 <Text style={styles.valeurInfo}>{telephone}</Text>
              </TouchableOpacity>
-             <TouchableOpacity style={[styles.carteInfo, { flex: 1.2 }]} onPress={() => Linking.openURL(`mailto:${email}`)}>
+             <TouchableOpacity style={styles.carteInfo} onPress={() => Linking.openURL(`mailto:${email}`)}>
                 <Ionicons name="mail" size={20} color={couleurs.primaire} />
-                <Text style={styles.valeurInfo}>{email}</Text>
+                <Text style={styles.valeurInfo} numberOfLines={1}>{email}</Text>
              </TouchableOpacity>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.titreSection}>Événements à venir</Text>
-          {evenements.map((evenement, index) => (
-            <CarteEvenement 
-              key={evenement.id} 
-              evenement={evenement} 
-              index={index} 
-              scrollY={scrollY} 
-            />
-          ))}
-        </View>
-
         <FaqAccordeon faq={faq} />
-
-        <FormulaireContact />
 
         <View style={{ height: 100 }} />
       </Animated.ScrollView>
@@ -103,7 +87,7 @@ export default function EcranInfosBibliotheque() {
   );
 }
 
-const styles = StyleSheet.create({
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   conteneur: {
     flex: 1,
     backgroundColor: couleurs.arrierePlan,
@@ -121,9 +105,9 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   titreEntete: {
-    fontSize: 20,
+    fontSize: fs(20),
     fontWeight: 'bold',
-    color: 'white',
+    color: couleurs.textePrincipal,
   },
   scrollContent: {
     padding: 20,
@@ -140,7 +124,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: couleurs.bordure,
   },
   iconeCercle: {
     width: 36,
@@ -155,25 +139,25 @@ const styles = StyleSheet.create({
   },
   labelInfo: {
     color: couleurs.texteSecondaire,
-    fontSize: 12,
+    fontSize: fs(12),
     marginBottom: 2,
   },
   valeurInfo: {
-    color: 'white',
-    fontSize: 14,
+    color: couleurs.textePrincipal,
+    fontSize: fs(14),
     fontWeight: '500',
   },
   ligneContact: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: 12,
   },
   section: {
     marginTop: 10,
   },
   titreSection: {
-    fontSize: 22,
+    fontSize: fs(22),
     fontWeight: 'bold',
-    color: 'white',
+    color: couleurs.textePrincipal,
     marginBottom: 20,
     paddingLeft: 5,
   }

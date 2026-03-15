@@ -7,10 +7,10 @@ import Animated, {
   withTiming, 
   Easing 
 } from 'react-native-reanimated';
-import { couleurs } from '../../theme/couleurs';
 import { utiliserMagasinInfosBiblio, Horaire } from '../../store/magasin_infos_biblio';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 
-const PulseStatut = () => {
+const PulseStatut = ({ couleurs }: { couleurs: any }) => {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
 
@@ -33,15 +33,18 @@ const PulseStatut = () => {
   }));
 
   return (
-    <View style={styles.conteneurPulse}>
-      <Animated.View style={[styles.cerclePulse, styleCercle]} />
-      <View style={styles.pointCentral} />
+    <View style={stylesStatic.conteneurPulse}>
+      <Animated.View style={[stylesStatic.cerclePulse, { backgroundColor: couleurs.succes }, styleCercle]} />
+      <View style={[stylesStatic.pointCentral, { backgroundColor: couleurs.succes }]} />
     </View>
   );
 };
 
 export const HorairesOuverture = () => {
   const { horaires, estOuverteActuellement } = utiliserMagasinInfosBiblio();
+  const { couleurs, fs } = useDesignSystem();
+  const styles = creerStyles(couleurs, fs);
+
   const jours = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
   const indexActuel = new Date().getDay();
   const jourActuelNom = jours[indexActuel];
@@ -52,7 +55,7 @@ export const HorairesOuverture = () => {
       <View style={styles.entete}>
         <Text style={styles.titre}>Horaires d'ouverture</Text>
         <View style={styles.badgeStatut}>
-          {estOuvert && <PulseStatut />}
+          {estOuvert && <PulseStatut couleurs={couleurs} />}
           <Text style={[styles.texteStatut, { color: estOuvert ? couleurs.succes : couleurs.erreur }]}>
             {estOuvert ? 'OUVERT' : 'FERMÉ'}
           </Text>
@@ -80,14 +83,34 @@ export const HorairesOuverture = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const stylesStatic = StyleSheet.create({
+  conteneurPulse: {
+    width: 12,
+    height: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cerclePulse: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    position: 'absolute',
+  },
+  pointCentral: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  }
+});
+
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   conteneur: {
     backgroundColor: couleurs.carteArrierePlan,
     borderRadius: 20,
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: couleurs.bordure,
   },
   entete: {
     flexDirection: 'row',
@@ -96,9 +119,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   titre: {
-    fontSize: 18,
+    fontSize: fs(18),
     fontWeight: 'bold',
-    color: 'white',
+    color: couleurs.textePrincipal,
   },
   badgeStatut: {
     flexDirection: 'row',
@@ -109,7 +132,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   texteStatut: {
-    fontSize: 12,
+    fontSize: fs(12),
     fontWeight: 'bold',
     marginLeft: 8,
   },
@@ -131,11 +154,11 @@ const styles = StyleSheet.create({
   },
   jour: {
     color: couleurs.texteSecondaire,
-    fontSize: 14,
+    fontSize: fs(14),
   },
   heures: {
-    color: 'white',
-    fontSize: 14,
+    color: couleurs.textePrincipal,
+    fontSize: fs(14),
     fontWeight: '500',
   },
   texteActif: {
@@ -149,24 +172,5 @@ const styles = StyleSheet.create({
     height: '60%',
     backgroundColor: couleurs.primaire,
     borderRadius: 2,
-  },
-  conteneurPulse: {
-    width: 12,
-    height: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cerclePulse: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: couleurs.succes,
-    position: 'absolute',
-  },
-  pointCentral: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: couleurs.succes,
   }
 });

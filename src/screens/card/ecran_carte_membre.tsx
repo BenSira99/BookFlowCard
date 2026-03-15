@@ -91,7 +91,7 @@ export default function EcranCarteMembre() {
         )}
       </Animated.View>
 
-      <Animated.View style={[styles.contenu, styleOuverture]} entering={FadeInDown.duration(800)}>
+      <Animated.View style={[styles.contenu, styleOuverture]}>
         <Text style={styles.titrePage}>Ma BiblioCard</Text>
         
         {/* Carte Holographique */}

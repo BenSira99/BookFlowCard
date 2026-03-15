@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { couleurs } from '../../theme/couleurs';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 
 interface ProprietesBouton {
   titre: string;
@@ -11,6 +11,9 @@ interface ProprietesBouton {
 }
 
 export const Bouton = ({ titre, surClic, estChargeant = false, type = 'primaire', style }: ProprietesBouton) => {
+  const { couleurs, fs } = useDesignSystem();
+  const styles = creerStyles(couleurs, fs);
+
   const obtenirStyleFond = () => {
     switch (type) {
       case 'secondaire': return styles.fondSecondaire;
@@ -43,17 +46,16 @@ export const Bouton = ({ titre, surClic, estChargeant = false, type = 'primaire'
   );
 };
 
-const styles = StyleSheet.create({
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   bouton: {
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12, // Bordures arrondies Premium
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
     width: '100%',
     marginVertical: 8,
-    // Ombre subtile pour l'effet premium
     shadowColor: couleurs.primaireFonce,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -74,7 +76,7 @@ const styles = StyleSheet.create({
     backgroundColor: couleurs.erreur,
   },
   texte: {
-    fontSize: 16,
+    fontSize: fs(16),
     fontWeight: 'bold',
   },
   textePrimaire: {

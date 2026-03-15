@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
-import Animated, { FadeInRight, useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { couleurs } from '../../theme/couleurs';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 import { Livre } from '../../store/magasin_catalogue';
 
 interface ProprietesCarteLivre {
@@ -14,7 +14,7 @@ interface ProprietesCarteLivre {
 /**
  * Pastille de disponibilité animée (effet "breathing").
  */
-const PastilleDisponibilite = ({ disponible }: { disponible: boolean }) => {
+const PastilleDisponibilite = ({ disponible, couleurs, fs }: { disponible: boolean, couleurs: any, fs: any }) => {
   const opacite = useSharedValue(0.6);
 
   React.useEffect(() => {
@@ -31,6 +31,8 @@ const PastilleDisponibilite = ({ disponible }: { disponible: boolean }) => {
     opacity: disponible ? opacite.value : 0.5,
     transform: [{ scale: disponible ? withRepeat(withTiming(1.2, { duration: 1500 }), -1, true) : 1 }]
   }));
+
+  const styles = creerStyles(couleurs, fs);
 
   return (
     <View style={styles.conteneurPastille}>
@@ -49,11 +51,11 @@ const PastilleDisponibilite = ({ disponible }: { disponible: boolean }) => {
 };
 
 export const CarteLivreCatalogue = ({ livre, index, onPress }: ProprietesCarteLivre) => {
+  const { couleurs, fs } = useDesignSystem();
+  const styles = creerStyles(couleurs, fs);
+
   return (
-    <Animated.View 
-      entering={FadeInRight.delay(index * 100).springify().damping(12)}
-      style={styles.conteneur}
-    >
+    <View style={styles.conteneur}>
       <TouchableOpacity style={styles.carte} activeOpacity={0.8} onPress={onPress}>
         <Image source={{ uri: livre.image }} style={styles.couverture} />
         
@@ -65,18 +67,18 @@ export const CarteLivreCatalogue = ({ livre, index, onPress }: ProprietesCarteLi
           </View>
           
           <View style={styles.pied}>
-            <PastilleDisponibilite disponible={livre.estDisponible} />
+            <PastilleDisponibilite disponible={livre.estDisponible} couleurs={couleurs} fs={fs} />
             <TouchableOpacity style={styles.boutonFavori}>
-               <Ionicons name={livre.estFavori ? "heart" : "heart-outline"} size={22} color={livre.estFavori ? couleurs.erreur : "white"} />
+               <Ionicons name={livre.estFavori ? "heart" : "heart-outline"} size={22} color={livre.estFavori ? couleurs.erreur : couleurs.textePrincipal} />
             </TouchableOpacity>
           </View>
         </View>
       </TouchableOpacity>
-    </Animated.View>
+    </View>
   );
 };
 
-const styles = StyleSheet.create({
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   conteneur: {
     width: '100%',
     marginBottom: 16,
@@ -87,7 +89,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: couleurs.bordure,
   },
   couverture: {
     width: 100,
@@ -100,20 +102,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   categorie: {
-    fontSize: 10,
+    fontSize: fs(10),
     fontWeight: 'bold',
     color: couleurs.primaire,
     letterSpacing: 1,
     marginBottom: 4,
   },
   titre: {
-    fontSize: 16,
+    fontSize: fs(16),
     fontWeight: 'bold',
-    color: 'white',
+    color: couleurs.textePrincipal,
     marginBottom: 2,
   },
   auteur: {
-    fontSize: 13,
+    fontSize: fs(13),
     color: couleurs.texteSecondaire,
   },
   pied: {
@@ -133,7 +135,7 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   textePastille: {
-    fontSize: 11,
+    fontSize: fs(11),
     fontWeight: '600',
   },
   boutonFavori: {

@@ -79,7 +79,7 @@ export const CarteLivreEmprunte = ({ emprunt, surProlonger, surRetourner }: Prop
   };
 
   return (
-    <Animated.View style={[styles.conteneur, styleCarte]} entering={FadeInRight.springify()}>
+    <Animated.View style={[styles.conteneur, styleCarte]}>
       <Swipeable
         renderRightActions={ActionsDroite}
         friction={2}

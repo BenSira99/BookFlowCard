@@ -4,8 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 
-import { couleurs } from '../../theme/couleurs';
 import { utiliserMagasinCatalogue } from '../../store/magasin_catalogue';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 
 // Composants
 import { BarreRechercheAnimee } from '../../components/catalog/barre_recherche_animee';
@@ -23,6 +23,9 @@ export default function EcranCatalogue() {
     filtreCategorie, 
     setFiltreCategorie 
   } = utiliserMagasinCatalogue();
+
+  const { couleurs, fs } = useDesignSystem();
+  const styles = creerStyles(couleurs, fs);
 
   const livresFiltrer = livres.filter(l => {
     const matchRecherche = l.titre.toLowerCase().includes(termeRecherche.toLowerCase()) || 
@@ -78,7 +81,7 @@ export default function EcranCatalogue() {
   );
 }
 
-const styles = StyleSheet.create({
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   conteneur: {
     flex: 1,
     backgroundColor: couleurs.arrierePlan,
@@ -91,9 +94,9 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   titreSection: {
-    fontSize: 22,
+    fontSize: fs(22),
     fontWeight: 'bold',
-    color: 'white',
+    color: couleurs.textePrincipal,
     marginLeft: 20,
     marginTop: 10,
   },
@@ -107,6 +110,7 @@ const styles = StyleSheet.create({
   },
   texteVide: {
     color: couleurs.texteSecondaire,
+    fontSize: fs(14),
   }
 });
 

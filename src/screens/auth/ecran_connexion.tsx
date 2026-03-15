@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { Ionicons } from '@expo/vector-icons';
-import { couleurs } from '../../theme/couleurs';
+import { useDesignSystem } from '../../hooks/useDesignSystem';
 import { ClavierNumerique } from '../../components/common/clavier_numerique';
 import { utiliserMagasinAuth } from '../../store/magasin_auth';
 import { utiliserMagasinSecurite } from '../../store/magasin_securite';
@@ -13,6 +13,7 @@ import { Alert } from 'react-native';
 export default function EcranConnexion() {
   const [pin, setPin] = useState('');
   const [biometrieDisponible, setBiometrieDisponible] = useState(false);
+  const { couleurs, fs } = useDesignSystem();
   
   // Magasins Zustand
   const { connecter } = utiliserMagasinAuth();
@@ -25,6 +26,7 @@ export default function EcranConnexion() {
   
   const LONGUEUR_PIN = 6;
   const shakeAnimation = useSharedValue(0);
+  const styles = creerStyles(couleurs, fs);
 
   useEffect(() => {
     verifierBiometrieDispo();
@@ -109,8 +111,6 @@ export default function EcranConnexion() {
 
   const simulerConnexion = () => {
     const user = utiliserMagasinAuth.getState().utilisateur;
-    // Si l'utilisateur est déjà dans le store (ex: via QR), on le connecte
-    // Sinon on simule une connexion par défaut
     connecter('token_jwt_local', user || {
       id: '1',
       nom: 'Dupont',
@@ -129,7 +129,7 @@ export default function EcranConnexion() {
     <SafeAreaView style={styles.conteneur}>
       <View style={styles.entete}>
         <View style={styles.iconeProfil}>
-          <Ionicons name="person" size={40} color={couleurs.primaireFonce} />
+          <Ionicons name="person" size={fs(40)} color={couleurs.primaire} />
         </View>
         <Text style={styles.titre}>Ravi de vous revoir !</Text>
         
@@ -163,7 +163,7 @@ export default function EcranConnexion() {
         <View style={styles.actionsSecondaires}>
           {biometrieDisponible && !estVerrouille && (
             <TouchableOpacity onPress={declencherBiometrie} style={styles.boutonBiometrie}>
-              <Ionicons name="finger-print" size={24} color={couleurs.primaire} style={{ marginRight: 8 }} />
+              <Ionicons name="finger-print" size={fs(24)} color={couleurs.primaire} style={{ marginRight: 8 }} />
               <Text style={styles.texteLien}>Utiliser la biométrie</Text>
             </TouchableOpacity>
           )}
@@ -177,7 +177,7 @@ export default function EcranConnexion() {
   );
 }
 
-const styles = StyleSheet.create({
+const creerStyles = (couleurs: any, fs: any) => StyleSheet.create({
   conteneur: {
     flex: 1,
     backgroundColor: couleurs.arrierePlan,
@@ -186,6 +186,7 @@ const styles = StyleSheet.create({
   entete: {
     alignItems: 'center',
     paddingHorizontal: 24,
+    paddingTop: 10,
   },
   iconeProfil: {
     width: 80,
@@ -199,18 +200,18 @@ const styles = StyleSheet.create({
     borderColor: couleurs.bordure,
   },
   titre: {
-    fontSize: 24,
+    fontSize: fs(24),
     fontWeight: 'bold',
     color: couleurs.textePrincipal,
     marginBottom: 8,
   },
   texte: {
     color: couleurs.texteSecondaire,
-    fontSize: 16,
+    fontSize: fs(16),
   },
   texteErreur: {
     color: couleurs.erreur,
-    fontSize: 16,
+    fontSize: fs(16),
     textAlign: 'center',
     paddingHorizontal: 20,
   },
@@ -234,7 +235,7 @@ const styles = StyleSheet.create({
   },
   pointVerrouille: {
     borderColor: couleurs.erreur,
-    backgroundColor: couleurs.transparent,
+    backgroundColor: 'transparent',
   },
   conteneurBas: {
     flex: 1,
@@ -252,7 +253,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     marginBottom: 16,
-    backgroundColor: 'rgba(13, 148, 136, 0.1)',
+    backgroundColor: couleurs.estModeSombre ? 'rgba(13, 148, 136, 0.15)' : 'rgba(13, 148, 136, 0.1)',
     borderRadius: 20,
     paddingHorizontal: 24,
   },
@@ -262,11 +263,11 @@ const styles = StyleSheet.create({
   texteLien: {
     color: couleurs.primaire,
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: fs(16),
   },
   texteLienGris: {
     color: couleurs.texteSecondaire,
-    fontSize: 14,
+    fontSize: fs(14),
     textDecorationLine: 'underline',
   }
 });
